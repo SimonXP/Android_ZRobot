@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.iflytek.cloud.RecognizerResult;
-import com.robot.et.service.software.iflytek.ParseResultCallBack;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,23 +73,23 @@ public class ResultParse {
 	 * 科大讯飞语义理解的json解析
 	 * service + question + answer
 	 */
-    public static void parseAnswerResult(String result, ParseResultCallBack callBack) {
-        try {
-            JSONTokener tokener = new JSONTokener(result);
-            JSONObject jObject = new JSONObject(tokener);
-            int isSuccessInt = jObject.getInt("rc");
-            String question = jObject.getString("text");
-            String service = "";
-            // rc=0 操作成功
-            if (isSuccessInt == 0) {
-                service = jObject.getString("service");
-            }
-            callBack.getResult(question, service, jObject);
-        } catch (JSONException e) {
-            Log.i(TAG, "parseIatAnswerResult  JSONException");
-            callBack.onError(e.getMessage());
-        }
-    }
+//    public static void parseAnswerResult(String result, ParseResultCallBack callBack) {
+//        try {
+//            JSONTokener tokener = new JSONTokener(result);
+//            JSONObject jObject = new JSONObject(tokener);
+//            int isSuccessInt = jObject.getInt("rc");
+//            String question = jObject.getString("text");
+//            String service = "";
+//            // rc=0 操作成功
+//            if (isSuccessInt == 0) {
+//                service = jObject.getString("service");
+//            }
+//            callBack.getResult(question, service, jObject);
+//        } catch (JSONException e) {
+//            Log.i(TAG, "parseIatAnswerResult  JSONException");
+//            callBack.onError(e.getMessage());
+//        }
+//    }
 
     //百科,计算器,日期,社区问答,褒贬&问候&情绪,闲聊
     public static String getAnswerData(JSONObject jObject){

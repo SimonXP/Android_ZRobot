@@ -34,12 +34,12 @@ public class MainActivity extends RosActivity {
         startService(new Intent(this, IflyVoiceToTextService.class));
         //语音合成
         startService(new Intent(this, IflySpeakService.class));
-        //文本理解
-        startService(new Intent(this, IflyTextUnderstanderService.class));
-        //图灵
-        startService(new Intent(this, TuRingService.class));
-        //音乐
-        startService(new Intent(this, MusicPlayerService.class));
+//        //文本理解
+//        startService(new Intent(this, IflyTextUnderstanderService.class));
+//        //图灵
+//        startService(new Intent(this, TuRingService.class));
+//        //音乐
+//        startService(new Intent(this, MusicPlayerService.class));
     }
 
     @Override
@@ -56,10 +56,10 @@ public class MainActivity extends RosActivity {
 
     private void destoryService() {
         stopService(new Intent(this, IflyVoiceToTextService.class));
-        stopService(new Intent(this, IflySpeakService.class));
-        stopService(new Intent(this, IflyTextUnderstanderService.class));
-        stopService(new Intent(this, TuRingService.class));
-        stopService(new Intent(this, MusicPlayerService.class));
+//        stopService(new Intent(this, IflySpeakService.class));
+//        stopService(new Intent(this, IflyTextUnderstanderService.class));
+//        stopService(new Intent(this, TuRingService.class));
+//        stopService(new Intent(this, MusicPlayerService.class));
     }
 
 }

@@ -7,25 +7,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.robot.et.common.BroadcastAction;
 import com.robot.et.common.DataConfig;
-import com.robot.et.service.software.SpeechSynthesizer;
-import com.robot.et.service.software.impl.SpeechlHandle;
-import com.robot.et.service.software.system.music.PlayerControl;
 
-public class IflySpeakService extends Service implements SpeechSynthesizer {
+public class IflySpeakService extends Service{
 	// 语音合成对象
-	private com.iflytek.cloud.SpeechSynthesizer mTts;
-	private int currentType;
-	private boolean isFirstSetParam;
+	private SpeechSynthesizer mTts;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -35,15 +30,16 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.i("ifly", "IflySpeakService  onCreate()");
-		// 初始化合成对象
-		mTts = com.iflytek.cloud.SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
-		SpeechlHandle.setSpeechSynthesizer(this);
+		Log.i("ifly", "科大讯飞语音合成执行onCreate()方法");
+		// 初始化合成对象（第二个参数传值为null的时候，为在线合成）
+		mTts = SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
+		setParam(mTts, DataConfig.DEFAULT_SPEAK_MEN, "60", "50", "50");
 
+		//注册广播的监听
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(BroadcastAction.ACTION_SPEAK);
+		filter.addAction(BroadcastAction.ACTION_START_SPEAK);
+		filter.addAction(BroadcastAction.ACTION_STOP_SPEAK);
 		registerReceiver(receiver, filter);
-
 	}
 	
 	@Override
@@ -54,38 +50,19 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 	BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(BroadcastAction.ACTION_SPEAK)) {//说话
-				currentType = intent.getIntExtra("type", 0);
-				String content = intent.getStringExtra("content");
-				if (!TextUtils.isEmpty(content)) {
-					speakContent(content);
-				} else {
-					SpeechlHandle.startListen();
-				}
+			if (intent.getAction().equals(BroadcastAction.ACTION_START_SPEAK)) {//开始说
+				String content =intent.getStringExtra("result");
+				speakContent(content);
+			} else if (intent.getAction().equals(BroadcastAction.ACTION_STOP_SPEAK)) {//停止说
+				stopSpeak();
 			}
 		}
 	};
 
+
+	//说话
 	private void speakContent (String content) {
-		if(!isFirstSetParam){
-			isFirstSetParam = true;
-			setTextToVoiceParam(mTts, DataConfig.DEFAULT_SPEAK_MEN, "60", "50", "50");
-		}
-
-		int code = mTts.startSpeaking(content, mTtsListener);
-		// * 只保存音频不进行播放接口,调用此接口请注释startSpeaking接口
-		// * text:要合成的文本，uri:需要保存的音频全路径，listener:回调接口
-		// String path =
-		// Environment.getExternalStorageDirectory()+"/tts.pcm";
-		// int code = mTts.synthesizeToUri(text, path, mTtsListener);
-
-		if (code != ErrorCode.SUCCESS) {
-			if (code == ErrorCode.ERROR_COMPONENT_NOT_INSTALLED) {
-				// 未安装则跳转到提示安装页面
-			} else {
-				Log.i("ifly", "语音合成失败,错误码=== " + code);
-			}
-		}
+		 mTts.startSpeaking(content, mTtsListener);
 	}
 	
 	// 初始化监听
@@ -93,6 +70,7 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 		@Override
 		public void onInit(int code) {
 			if (code != ErrorCode.SUCCESS) {
+				Log.e("ifly","语音合成初始化失败");
 				// 初始化失败,错误码
 			} else {
 				// 初始化成功，之后可以调用startSpeaking方法
@@ -119,23 +97,21 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 		}
 		// 合成进度
 		@Override
-		public void onBufferProgress(int percent, int beginPos, int endPos,
-				String info) {
+		public void onBufferProgress(int percent, int beginPos, int endPos, String info) {
 		}
 		// 播放进度
 		@Override
 		public void onSpeakProgress(int percent, int beginPos, int endPos) {
+
 		}
 		@Override
 		public void onCompleted(SpeechError error) {
-			Log.i("ifly", "IflySpeakService  onCompleted()");
 			if (error == null) {
-				responseSpeakCompleted();
+				Log.i("ifly", "语音合成完成");
 			} else {
-				Log.i("ifly", "onCompleted  error=" + error.getPlainDescription(true));
-				SpeechlHandle.startListen();
+				Log.e("ifly", "onCompleted  error=" + error.getPlainDescription(true));
 			}
-
+			notifyStartListen();
 		}
 
 		@Override
@@ -149,29 +125,11 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 		}
 	};
 
-	private void responseSpeakCompleted () {
-		switch (currentType) {
-			case DataConfig.SPEAK_TYPE_CHAT://对话
-				SpeechlHandle.startListen();
-				break;
-			case DataConfig.SPEAK_TYPE_MUSIC_START://音乐开始播放前的提示
-				Intent intent = new Intent();
-				intent.setAction(BroadcastAction.ACTION_PLAY_MUSIC_START);
-				intent.putExtra("musicUrl", PlayerControl.getMusicSrc());
-				sendBroadcast(intent);
-				break;
-			default:
-				break;
-		}
-	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		stopSpeak();
-		// 退出时释放连接
-		mTts.destroy();
-		unregisterReceiver(receiver);
+	//通知耳朵继续开始听
+	private void notifyStartListen(){
+		Intent intent=new Intent();
+		intent.setAction(BroadcastAction.ACTION_START_LISTEN);
+		sendBroadcast(intent);
 	}
 
 	private void stopSpeak () {
@@ -180,31 +138,13 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 		}
 	}
 
-	@Override
-	public void startSpeak(int speakType, String speakContent) {
-		Log.i("ifly", "IflySpeakService  speakType===" + speakType);
-		Log.i("ifly", "IflySpeakService  speakContent===" + speakContent);
-		currentType = speakType;
-		if (!TextUtils.isEmpty(speakContent)) {
-			speakContent(speakContent);
-		} else {
-			SpeechlHandle.startListen();
-		}
-
-	}
-
-	@Override
-	public void cancelSpeak() {
-		stopSpeak();
-	}
-
 	/*科大讯飞语音合成参数设置
      * speakMen 发音人
      * speed 语速
      * pitch 语调
      * volume 音量
      */
-	private void setTextToVoiceParam(com.iflytek.cloud.SpeechSynthesizer mTts, String speakMen, String speed, String pitch, String volume) {
+	private void setParam(SpeechSynthesizer mTts, String speakMen, String speed, String pitch, String volume) {
 		// 清空参数
 		mTts.setParameter(SpeechConstant.PARAMS, null);
 		// 根据合成引擎设置相应参数
@@ -223,4 +163,12 @@ public class IflySpeakService extends Service implements SpeechSynthesizer {
 		mTts.setParameter(SpeechConstant.KEY_REQUEST_FOCUS, "true");
 	}
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		stopSpeak();
+		// 退出时释放连接
+		mTts.destroy();
+		unregisterReceiver(receiver);
+	}
 }

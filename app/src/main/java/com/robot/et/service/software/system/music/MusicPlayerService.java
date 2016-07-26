@@ -72,7 +72,7 @@ public class MusicPlayerService extends Service {
     }
 
     private void musicSrcNotExit() {
-        intent.setAction(BroadcastAction.ACTION_SPEAK);
+        intent.setAction(BroadcastAction.ACTION_START_SPEAK);
         intent.putExtra("type", DataConfig.SPEAK_TYPE_CHAT);
         intent.putExtra("content", DataConfig.MUSIC_NOT_EXIT);
         sendBroadcast(intent);

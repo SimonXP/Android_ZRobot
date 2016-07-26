@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.robot.et.common.DataConfig;
-import com.robot.et.service.software.impl.SpeechlHandle;
 import com.turing.androidsdk.InitListener;
 import com.turing.androidsdk.SDKInit;
 import com.turing.androidsdk.SDKInitBuilder;
@@ -20,7 +19,7 @@ import turing.os.http.core.ErrorMessage;
 import turing.os.http.core.HttpConnectionListener;
 import turing.os.http.core.RequestResult;
 
-public class TuRingService extends Service implements TuringUnderstander {
+public class TuRingService extends Service{
 
 	private TuringApiManager mTuringApiManager;
 
@@ -33,18 +32,13 @@ public class TuRingService extends Service implements TuringUnderstander {
 	public void onCreate() {
 		super.onCreate();
 		Log.i("turing", "TuRingService  onCreate()");
-
-		SpeechlHandle.setTuringUnderstander(this);
-
 		initTuringSDK();
-
 	}
 
 	// turingSDK初始化
 	private void initTuringSDK() {
 		SDKInitBuilder builder = new SDKInitBuilder(this).setSecret(DataConfig.TURING_SECRET)
 				.setTuringKey(DataConfig.TURING_APPID).setUniqueId(DataConfig.TURING_UNIQUEID);
-
 		SDKInit.init(builder, new InitListener() {
 			@Override
 			public void onFail(String error) {
@@ -82,28 +76,23 @@ public class TuRingService extends Service implements TuringUnderstander {
 								Log.i("turing", "从科大讯飞没有获取到天气问图灵");
 								content = getWeatherContent(content);
 							}
-
-							SpeechlHandle.startSpeak(DataConfig.SPEAK_TYPE_CHAT, content);
 						} else {
-							SpeechlHandle.startListen();
+
 						}
 
 					} else{
-						SpeechlHandle.startListen();
 					}
 				} catch (JSONException e) {
 					Log.i("turing", "图灵JSONException====" + e.getMessage());
-					SpeechlHandle.startListen();
 				}
 			} else {
-				SpeechlHandle.startListen();
+
 			}
 		}
 
 		@Override
 		public void onError(ErrorMessage errorMessage) {
 			Log.i("turing", "图灵errorMessage.getMessage()====" + errorMessage.getMessage());
-			SpeechlHandle.startListen();
 		}
 	};
 	
@@ -112,19 +101,6 @@ public class TuRingService extends Service implements TuringUnderstander {
 		super.onDestroy();
 	}
 
-	@Override
-	public void understanderText(String content) {
-		if (!TextUtils.isEmpty(content)) {
-            //发出请求  以防mTuringApiManager为null
-			if (mTuringApiManager != null) {
-				mTuringApiManager.requestTuringAPI(content);
-			} else {
-				SpeechlHandle.startListen();
-			}
-		} else {
-			SpeechlHandle.startListen();
-		}
-	}
 
 	/*
 	 * content weather格式 上海:05/16 周一,15-24° 23° 晴 北风微风; 05/17 周二,16-26° 晴 东南风微风;
