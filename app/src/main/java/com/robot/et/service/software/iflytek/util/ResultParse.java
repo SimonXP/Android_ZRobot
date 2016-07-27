@@ -4,6 +4,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.iflytek.cloud.RecognizerResult;
+import com.robot.et.common.DataConfig;
+import com.robot.et.common.enums.EnumManager;
+import com.robot.et.common.enums.SceneServiceEnum;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,26 +73,117 @@ public class ResultParse {
     }
 
     /*
-	 * 科大讯飞语义理解的json解析
-	 * service + question + answer
-	 */
-//    public static void parseAnswerResult(String result, ParseResultCallBack callBack) {
-//        try {
-//            JSONTokener tokener = new JSONTokener(result);
-//            JSONObject jObject = new JSONObject(tokener);
-//            int isSuccessInt = jObject.getInt("rc");
-//            String question = jObject.getString("text");
-//            String service = "";
-//            // rc=0 操作成功
-//            if (isSuccessInt == 0) {
-//                service = jObject.getString("service");
-//            }
-//            callBack.getResult(question, service, jObject);
-//        } catch (JSONException e) {
-//            Log.i(TAG, "parseIatAnswerResult  JSONException");
-//            callBack.onError(e.getMessage());
-//        }
-//    }
+         * 科大讯飞语义理解的json解析
+         * service + question + answer
+         */
+    public static String[] parseAnswerResult(String result) {
+        String[] results = null;
+        try {
+            JSONTokener tokener = new JSONTokener(result);
+            JSONObject jObject = new JSONObject(tokener);
+            int isSuccessInt = jObject.getInt("rc");
+            results = new String[3];
+            String question = jObject.getString("text");
+            results[1] = question;
+
+            // rc=0 操作成功
+            if (isSuccessInt == 0) {
+                String service = jObject.getString("service");
+
+                results[0] = service;
+                SceneServiceEnum serviceEnum = EnumManager.getIflyService(service);
+                Log.i(TAG, "serviceEnum===" + serviceEnum);
+                if(serviceEnum != null){
+                    switch (serviceEnum) {
+                        case BAIKE://百科
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case CALC://计算器
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case COOKBOOK://菜谱
+                            results[2] = getCookBookData(jObject);
+                            break;
+                        case DATETIME://日期
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case FAQ://社区问答
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case FLIGHT://航班查询
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case HOTEL://酒店查询
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case MAP://地图查询
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case MUSIC://音乐
+                            results[2] = getMusicData(jObject);
+                            break;
+                        case RESTAURANT://餐馆
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case SCHEDULE://提醒
+                            results[2] = getRemindData(jObject);
+                            break;
+                        case STOCK://股票查询
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case TRAIN://火车查询
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case TRANSLATION://翻译
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case WEATHER://天气查询
+                            results[2] = getWeatherData(jObject);
+                            break;
+                        case OPENQA://褒贬&问候&情绪
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case TELEPHONE://打电话
+                            results[2] = getPhoneData(jObject);
+                            break;
+                        case MESSAGE://发短信
+                            // do nothing
+                            results[2] = "";
+                            break;
+                        case CHAT://闲聊
+                            results[2] = getAnswerData(jObject);
+                            break;
+                        case PM25://空气质量
+                            results[2] = getPm25Data(jObject);
+                            break;
+
+                        default:
+                            results[2] = "";
+                            break;
+                    }
+                }else{
+                    results[0] = "";
+                    results[2] = "";
+                }
+
+            } else {
+                // 返回的 rc!=0 无内容
+                results[0] = "";
+                results[2] = "";
+            }
+
+        } catch (JSONException e) {
+            Log.i(TAG, "parseIatAnswerResult  JSONException");
+        }
+        return results;
+    }
 
     //百科,计算器,日期,社区问答,褒贬&问候&情绪,闲聊
     public static String getAnswerData(JSONObject jObject){
@@ -138,7 +232,7 @@ public class ResultParse {
     }
 
     //获取音乐
-    public static String getMusicData(JSONObject jObject, String musicSplit){
+    public static String getMusicData(JSONObject jObject){
         String json = "";
         try {
             JSONObject jsonObject = jObject.getJSONObject("data");
@@ -157,7 +251,7 @@ public class ResultParse {
                 }
                 if (!TextUtils.isEmpty(url)) {
                     //歌手+歌名 + 歌曲src
-                    musics.add(singer + musicSplit + musicName + musicSplit + url);
+                    musics.add(singer + "&" + musicName + "&" + url);
                 }
             }
 
@@ -174,7 +268,7 @@ public class ResultParse {
     }
 
     //获取提醒
-    public static String getRemindData(JSONObject jObject, String scheduleSplit){
+    public static String getRemindData(JSONObject jObject){
         String json = "";
         try {
             JSONObject jsonObject = jObject.getJSONObject("semantic");
@@ -185,7 +279,7 @@ public class ResultParse {
             String date = dataObject.getString("date");// 日期
 
             // 日期 + 时间 + 做什么事
-            json = date + scheduleSplit + time + scheduleSplit + content;
+            json = date + "," + time + "," + content;
 
         } catch (JSONException e) {
             Log.i(TAG, "getRemindData  JSONException");
@@ -194,7 +288,7 @@ public class ResultParse {
     }
 
     //获取天气
-    public static String getWeatherData(JSONObject jObject, String city, String area){
+    public static String getWeatherData(JSONObject jObject){
         String json = "";
         try {
             JSONObject object1 = jObject.getJSONObject("semantic");
@@ -224,13 +318,13 @@ public class ResultParse {
                 String weather = object.getString("weather");// 天气现象
                 String tempRange = object.getString("tempRange");// 气温范围25℃~19℃
                 String content = "";
-                if (city.contains(iflyCity)) {// 是当前城市
-                    if (!TextUtils.isEmpty(iflyArea)) {
-                        content = time + iflyCity + iflyArea;
-                    } else {
-                        content = time + iflyCity + area;
-                    }
-                } else {// 不是当前城市
+//                if (city.contains(iflyCity)) {// 是当前城市
+//                    if (!TextUtils.isEmpty(iflyArea)) {
+//                        content = time + iflyCity + iflyArea;
+//                    } else {
+//                        content = time + iflyCity + area;
+//                    }
+//                } else {// 不是当前城市
                     if (!TextUtils.isEmpty(iflyArea)) {
                         content = time + iflyCity + iflyArea;
                     } else {
@@ -242,7 +336,7 @@ public class ResultParse {
                         }
 
                     }
-                }
+//                }
                 content = content + "天气："+ weather+ ",空气质量："+ airQuality+ ",风力："+ wind+ ",气温："+ tempRange	+ ",";
 
                 if (!TextUtils.equals(airQuality, "未知")) {
@@ -294,7 +388,7 @@ public class ResultParse {
     }
 
     //获取空气质量
-    public static String getPm25Data(JSONObject jObject, String city, String area){
+    public static String getPm25Data(JSONObject jObject){
         String json = "";
         try {
             JSONObject json1 = jObject.getJSONObject("semantic");
@@ -318,19 +412,20 @@ public class ResultParse {
 
                 String content = "";
 
-                if (city.contains(iflyCity)) {// 是当前城市
-                    if (!TextUtils.isEmpty(iflyArea)) {// 有返回区
-                        content = iflyCity + iflyArea;
-                    } else {// 没有返回区
-                        content = iflyCity + area;
-                    }
-                } else {// 不是当前城市
+//                if (city.contains(iflyCity)) {// 是当前城市
+//                    if (!TextUtils.isEmpty(iflyArea)) {// 有返回区
+//                        content = iflyCity + iflyArea;
+//                    } else {// 没有返回区
+//                        content = iflyCity + area;
+//                    }
+//                }
+//                else {// 不是当前城市
                     if (!TextUtils.isEmpty(iflyArea)) {// 有返回区
                         content = iflyCity + iflyArea;
                     } else {// 没有返回区
                         content = iflyCity;
                     }
-                }
+//                }
 
                 content = content + "pm值：" + pmValue + ",空气质量指数：" + aqi + ",空气质量：" + weather;
                 weathers.add(content);
