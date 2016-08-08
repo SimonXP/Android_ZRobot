@@ -1,35 +1,36 @@
-package com.robot.et.service.software.iflytek;
+package com.robot.et.core.software.iflytek;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.iflytek.cloud.ErrorCode;
-import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
-import com.robot.et.common.BroadcastAction;
 import com.robot.et.common.DataConfig;
-import com.robot.et.service.software.iflytek.util.ResultParse;
+import com.robot.et.core.software.iflytek.event.BeginListenEvent;
+import com.robot.et.core.software.iflytek.event.SpeechRecognizeResultEvent;
+import com.robot.et.core.software.iflytek.util.ResultParse;
 import com.robot.et.util.FileUtils;
 import com.robot.et.util.Utilities;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class IflyVoiceToTextService extends Service{
 	// 语音听写对象
-	private SpeechRecognizer mIat;
+	private SpeechRecognizer speechRecognizer;
 	// 用HashMap存储听写结果
 	private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
 
@@ -41,79 +42,46 @@ public class IflyVoiceToTextService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		EventBus.getDefault().register(this);
+
 		Log.i("ifly", "科大讯飞语音听写执行onCreate()方法");
-		// 初始化SpeechRecognizer对象
-		mIat = SpeechRecognizer.createRecognizer(this, mTtsInitListener);
-		uploadUserThesaurus();//上传词表
-		setParam();
-		beginListen();
-		//注册开始听和停止听的过滤器
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(BroadcastAction.ACTION_START_LISTEN);
-		filter.addAction(BroadcastAction.ACTION_STOP_LISTEN);
-		registerReceiver(receiver, filter);
-	}
-
-	BroadcastReceiver receiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(BroadcastAction.ACTION_START_LISTEN)) {//开始听
-				beginListen();
-			} else if (intent.getAction().equals(BroadcastAction.ACTION_STOP_LISTEN)) {//停止听
-				stopListen();
-			}
-		}
-	};
-
-	//参数设置
-	public void setParam(){
-		String language=DataConfig.DEFAULT_SPEAK_MEN;
+		// 初始化SpeechRecognizer对象,本地识别时，第二个参数需要传入，在线识别时，第二个参数为null
+		speechRecognizer = SpeechRecognizer.createRecognizer(this, null);
 		//设置参数
-		mIat.setParameter(SpeechConstant.PARAMS, null);
+		speechRecognizer.setParameter(SpeechConstant.PARAMS, null);
 		// 设置听写引擎
-		mIat.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
+		speechRecognizer.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
 		// 设置返回结果格式
-		mIat.setParameter(SpeechConstant.RESULT_TYPE, "json");
-		if (language.equals("en_us")) {
-			// 设置语言
-			mIat.setParameter(SpeechConstant.LANGUAGE, "en_us");
-		} else {
-			// 设置语言
-			mIat.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
-			// 设置语言区域
-			mIat.setParameter(SpeechConstant.ACCENT, language);
-		}
+		speechRecognizer.setParameter(SpeechConstant.RESULT_TYPE, "json");
+		// 设置语言
+		speechRecognizer.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
+		// 设置语言区域
+		speechRecognizer.setParameter(SpeechConstant.ACCENT, DataConfig.DEFAULT_SPEAK_MEN);
+
 		// 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
-		mIat.setParameter(SpeechConstant.VAD_BOS, "4000");
+		speechRecognizer.setParameter(SpeechConstant.VAD_BOS, "4000");
 
 		// 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-		mIat.setParameter(SpeechConstant.VAD_EOS, "1000");
+		speechRecognizer.setParameter(SpeechConstant.VAD_EOS, "1000");
 
 		// 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-		mIat.setParameter(SpeechConstant.ASR_PTT, "0");
+		speechRecognizer.setParameter(SpeechConstant.ASR_PTT, "0");
+		uploadUserThesaurus();//上传词表
+		beginListen();
+	}
+
+	@Subscribe(threadMode = ThreadMode.BACKGROUND)
+	public void onBeginListenEvent(BeginListenEvent event) {
+		beginListen();
 	}
 
 	//开始听
-	private void beginListen() {
+	@Subscribe
+	public void beginListen() {
 		// 清空数据
 		mIatResults.clear();
-		mIat.startListening(mRecognizerListener);
+		speechRecognizer.startListening(mRecognizerListener);
 	}
-
-	//初始化监听器
-	private InitListener mTtsInitListener = new InitListener() {
-		@Override
-		public void onInit(int code) {
-			if (code != ErrorCode.SUCCESS) {
-				//初始化失败,错误码
-				Log.e("ifly", "初始化监听器失败" );
-			} else {
-				// 初始化成功，之后可以调用startSpeaking方法
-				// 注：有的开发者在onCreate方法中创建完合成对象之后马上就调用startSpeaking进行合成，
-				// 正确的做法是将onCreate中的startSpeaking调用移至这里
-			}
-		}
-	};
 	
 	 //听写监听器
 	private RecognizerListener mRecognizerListener = new RecognizerListener() {
@@ -150,7 +118,7 @@ public class IflyVoiceToTextService extends Service{
 					if (result.length() == 1) {
 						return;
 					}else {
-						notifyStartSpeak(result);
+						EventBus.getDefault().post(new SpeechRecognizeResultEvent(result));
 					}
 				} else {
 					beginListen();
@@ -192,32 +160,24 @@ public class IflyVoiceToTextService extends Service{
 	private void uploadUserThesaurus(){
 		String contents = FileUtils.readFile(this,"userwords","utf-8");
 		// 指定引擎类型
-		mIat.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
+		speechRecognizer.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
 		// 置编码类型
-		mIat.setParameter(SpeechConstant.TEXT_ENCODING, "utf-8");
-		mIat.updateLexicon("userword", contents, mLexiconListener);
-	}
-
-	//通知Robot理解文字内容
-	private void notifyStartSpeak(String result){
-		Intent intent=new Intent();
-		intent.setAction(BroadcastAction.ACTION_START_UNDERSTAND);
-		intent.putExtra("result",result);
-		sendBroadcast(intent);
+		speechRecognizer.setParameter(SpeechConstant.TEXT_ENCODING, "utf-8");
+		speechRecognizer.updateLexicon("userword", contents, mLexiconListener);
 	}
 
 	//关闭听
 	private void stopListen () {
-		if(mIat.isListening()){
-			mIat.cancel();
+		if(speechRecognizer.isListening()){
+			speechRecognizer.cancel();
 		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		EventBus.getDefault().unregister(this);
 		stopListen();
-		mIat.destroy();
-		unregisterReceiver(receiver);
+		speechRecognizer.destroy();
 	}
 }

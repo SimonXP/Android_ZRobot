@@ -1,4 +1,4 @@
-package com.robot.et.service.software.turing;
+package com.robot.et.core.software.turing;
 
 import android.app.Service;
 import android.content.Intent;

@@ -1,10 +1,9 @@
-package com.robot.et.service.software.iflytek.util;
+package com.robot.et.core.software.iflytek.util;
 
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.iflytek.cloud.RecognizerResult;
-import com.robot.et.common.DataConfig;
 import com.robot.et.common.enums.EnumManager;
 import com.robot.et.common.enums.SceneServiceEnum;
 

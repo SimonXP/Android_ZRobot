@@ -1,4 +1,4 @@
-package com.robot.et.service.software.ros;
+package com.robot.et.core.software.ros;
 
 import android.util.Log;
 

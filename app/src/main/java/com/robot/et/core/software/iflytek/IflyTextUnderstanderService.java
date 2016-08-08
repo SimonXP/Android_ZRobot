@@ -1,10 +1,7 @@
-package com.robot.et.service.software.iflytek;
+package com.robot.et.core.software.iflytek;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -17,8 +14,12 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.TextUnderstander;
 import com.iflytek.cloud.TextUnderstanderListener;
 import com.iflytek.cloud.UnderstanderResult;
-import com.robot.et.common.BroadcastAction;
-import com.robot.et.service.software.iflytek.util.ResultParse;
+import com.robot.et.core.software.iflytek.event.SpeechRecognizeResultEvent;
+import com.robot.et.core.software.iflytek.util.ResultParse;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 //科大讯飞文本语义理解
 public class IflyTextUnderstanderService extends Service{
@@ -33,13 +34,9 @@ public class IflyTextUnderstanderService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		EventBus.getDefault().register(this);
 		Log.i("ifly", "科大讯飞语义理解执行onCreate()方法");
 		mTextUnderstander = TextUnderstander.createTextUnderstander(this,textUnderstanderListener);
-		//
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(BroadcastAction.ACTION_START_LISTEN);
-		filter.addAction(BroadcastAction.ACTION_STOP_LISTEN);
-		registerReceiver(receiver, filter);
 	}
 
 	@Override
@@ -47,26 +44,15 @@ public class IflyTextUnderstanderService extends Service{
 		return super.onStartCommand(intent, flags, startId);
 	}
 
-	BroadcastReceiver receiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(BroadcastAction.ACTION_START_UNDERSTAND)) {//开始听
-				String content=intent.getStringExtra("result");
-				startTextUnderstander(content);
-			} else if (intent.getAction().equals(BroadcastAction.ACTION_STOP_UNDERSTAND)) {//停止听
-				stopTextUnderstander();
-			}
-		}
-	};
-
 
 	//开始文本理解
-	private void startTextUnderstander(String content) {
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	private void startTextUnderstander(SpeechRecognizeResultEvent event) {
 		if (mTextUnderstander.isUnderstanding()) {
 			Log.i("ifly", "文本理取消");
 			mTextUnderstander.cancel();
 		}
-		mTextUnderstander.understandText(content, textListener);
+		mTextUnderstander.understandText(event.result, textListener);
 	}
 	//取消文本理解
 	private void stopTextUnderstander(){
@@ -87,10 +73,10 @@ public class IflyTextUnderstanderService extends Service{
 
 		@Override
 		public void onResult(UnderstanderResult result) {
-			Log.i("ifly", "文本理解onResult");
-			Message message = handler.obtainMessage();
-			message.obj = result;
-			handler.sendMessage(message);
+			Log.i("ifly", "文本理解onResult=======>"+result);
+			String content=result.getResultString();
+			Log.i("ifly","content=========>"+content);
+//			EventBus.getDefault().post(new MessageEvent("Hello everyone!"));
 		}
 
 		@Override
@@ -100,40 +86,14 @@ public class IflyTextUnderstanderService extends Service{
 		}
 	};
 
-	Handler handler = new Handler() {
-		public void handleMessage(Message msg) {
-			UnderstanderResult result = (UnderstanderResult) msg.obj;
-			Log.i("ifly", "文本理解onResult  result===" + result);
-			if (null != result) {
-				String text = result.getResultString();
-				Log.i("ifly", "文本理解text===" + text);
-				if (!TextUtils.isEmpty(text)) {
-					ResultParse.printResult()
-//					notifyStartSpeak(text);
-				} else {
-					//请求图灵
-				}
-			} else {
-				//请求图灵
-				Log.i("ifly", "文本理解不正确");
-			}
-		};
-	};
-
-	private void notifyStartSpeak(String content){
-		Intent intent=new Intent();
-		intent.setAction(BroadcastAction.ACTION_START_SPEAK);
-		intent.putExtra("result",content);
-		sendBroadcast(intent);
-	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		EventBus.getDefault().unregister(this);
 		if (mTextUnderstander.isUnderstanding()) {
 			mTextUnderstander.cancel();
 		}
 		mTextUnderstander.destroy();
-		unregisterReceiver(receiver);
 	}
 }

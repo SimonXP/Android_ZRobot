@@ -1,10 +1,7 @@
-package com.robot.et.service.software.iflytek;
+package com.robot.et.core.software.iflytek;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -15,8 +12,9 @@ import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
-import com.robot.et.common.BroadcastAction;
 import com.robot.et.common.DataConfig;
+
+import org.greenrobot.eventbus.Subscribe;
 
 public class IflySpeakService extends Service{
 	// 语音合成对象
@@ -33,34 +31,30 @@ public class IflySpeakService extends Service{
 		Log.i("ifly", "科大讯飞语音合成执行onCreate()方法");
 		// 初始化合成对象（第二个参数传值为null的时候，为在线合成）
 		mTts = SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
-		setParam(mTts, DataConfig.DEFAULT_SPEAK_MEN, "60", "50", "50");
-
-		//注册广播的监听
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(BroadcastAction.ACTION_START_SPEAK);
-		filter.addAction(BroadcastAction.ACTION_STOP_SPEAK);
-		registerReceiver(receiver, filter);
+		// 清空参数
+		mTts.setParameter(SpeechConstant.PARAMS, null);
+		// 根据合成引擎设置相应参数
+		mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
+		// 设置合成发音人
+		mTts.setParameter(SpeechConstant.VOICE_NAME, DataConfig.DEFAULT_SPEAK_MEN);
+		// 设置合成语速
+		mTts.setParameter(SpeechConstant.SPEED, "60");
+		// 设置合成音调
+		mTts.setParameter(SpeechConstant.PITCH, "50");
+		// 设置合成音量
+		mTts.setParameter(SpeechConstant.VOLUME, "50");
+		// 设置播放器音频流类型
+		mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
+		// 设置播放合成音频打断音乐播放，默认为true
+		mTts.setParameter(SpeechConstant.KEY_REQUEST_FOCUS, "true");
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		return super.onStartCommand(intent, flags, startId);
 	}
-
-	BroadcastReceiver receiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(BroadcastAction.ACTION_START_SPEAK)) {//开始说
-				String content =intent.getStringExtra("result");
-				speakContent(content);
-			} else if (intent.getAction().equals(BroadcastAction.ACTION_STOP_SPEAK)) {//停止说
-				stopSpeak();
-			}
-		}
-	};
-
-
 	//说话
+	@Subscribe
 	private void speakContent (String content) {
 		 mTts.startSpeaking(content, mTtsListener);
 	}
@@ -111,7 +105,6 @@ public class IflySpeakService extends Service{
 			} else {
 				Log.e("ifly", "onCompleted  error=" + error.getPlainDescription(true));
 			}
-			notifyStartListen();
 		}
 
 		@Override
@@ -125,42 +118,10 @@ public class IflySpeakService extends Service{
 		}
 	};
 
-	//通知耳朵继续开始听
-	private void notifyStartListen(){
-		Intent intent=new Intent();
-		intent.setAction(BroadcastAction.ACTION_START_LISTEN);
-		sendBroadcast(intent);
-	}
-
 	private void stopSpeak () {
 		if(mTts.isSpeaking()){
 			mTts.stopSpeaking();
 		}
-	}
-
-	/*科大讯飞语音合成参数设置
-     * speakMen 发音人
-     * speed 语速
-     * pitch 语调
-     * volume 音量
-     */
-	private void setParam(SpeechSynthesizer mTts, String speakMen, String speed, String pitch, String volume) {
-		// 清空参数
-		mTts.setParameter(SpeechConstant.PARAMS, null);
-		// 根据合成引擎设置相应参数
-		mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
-		// 设置合成发音人
-		mTts.setParameter(SpeechConstant.VOICE_NAME, speakMen);
-		// 设置合成语速
-		mTts.setParameter(SpeechConstant.SPEED, speed);
-		// 设置合成音调
-		mTts.setParameter(SpeechConstant.PITCH, pitch);
-		// 设置合成音量
-		mTts.setParameter(SpeechConstant.VOLUME, volume);
-		// 设置播放器音频流类型
-		mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
-		// 设置播放合成音频打断音乐播放，默认为true
-		mTts.setParameter(SpeechConstant.KEY_REQUEST_FOCUS, "true");
 	}
 
 	@Override
@@ -169,6 +130,5 @@ public class IflySpeakService extends Service{
 		stopSpeak();
 		// 退出时释放连接
 		mTts.destroy();
-		unregisterReceiver(receiver);
 	}
 }

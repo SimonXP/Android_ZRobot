@@ -1,14 +1,10 @@
-package com.robot.et.service.hardware.wakeup;
+package com.robot.et.core.hardware.wakeup;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.robot.et.common.BroadcastAction;
 import com.robot.et.util.ShellUtils;
 import com.robot.et.util.ShellUtils.CommandResult;
 
@@ -34,10 +30,7 @@ public class WakeUpServices extends Service {
 		openI2C();
 		fd = WakeUp.open("", 0);
 		Log.i("wakeup", "fd:" + fd);
-		
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(BroadcastAction.ACTION_WAKE_UP_RESET);
-		registerReceiver(receiver, filter);
+
 		mGetDegreeThread = new GetDegreeThread();
 		mGetDegreeThread.start();
 	}
@@ -68,10 +61,7 @@ public class WakeUpServices extends Service {
 						degree = WakeUp.getWakeUpDegree();
 						Log.i("wakeup", "degree:" + degree);
 						WakeUp.setGainDirection(0);// 设置麦克0为主麦
-						Intent intent = new Intent();
-						intent.setAction(BroadcastAction.ACTION_WAKE_UP_AND_MOVE);
-						intent.putExtra("degree", degree);
-						sendBroadcast(intent);
+
 					} else {
 						// Log.i("wakeup", "no wakeUp");
 					}
@@ -81,22 +71,10 @@ public class WakeUpServices extends Service {
 			}
 		}
 	}
-	
-	BroadcastReceiver receiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(BroadcastAction.ACTION_WAKE_UP_RESET)) {
-				Log.i("wakeup", "唤醒重置");
-				int i= WakeUp.wakeUpReset();
-			}
-		}
-	};
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		// 此处不要忘记关闭线程，暂时放在这里.2016-06-08
-		unregisterReceiver(receiver);
 	}
 }

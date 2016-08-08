@@ -1,14 +1,12 @@
-package com.robot.et.main;
+package com.robot.et.business;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.robot.et.R;
-import com.robot.et.service.software.iflytek.IflySpeakService;
-import com.robot.et.service.software.iflytek.IflyTextUnderstanderService;
-import com.robot.et.service.software.iflytek.IflyVoiceToTextService;
-import com.robot.et.service.software.system.music.MusicPlayerService;
-import com.robot.et.service.software.turing.TuRingService;
+import com.robot.et.core.software.iflytek.IflySpeakService;
+import com.robot.et.core.software.iflytek.IflyTextUnderstanderService;
+import com.robot.et.core.software.iflytek.IflyVoiceToTextService;
 
 import org.ros.android.RosActivity;
 import org.ros.node.NodeMainExecutor;
@@ -32,10 +30,11 @@ public class MainActivity extends RosActivity {
     private void initService() {
         //语音听写
         startService(new Intent(this, IflyVoiceToTextService.class));
+        //文本理解
+        startService(new Intent(this, IflyTextUnderstanderService.class));
         //语音合成
         startService(new Intent(this, IflySpeakService.class));
-//        //文本理解
-//        startService(new Intent(this, IflyTextUnderstanderService.class));
+
 //        //图灵
 //        startService(new Intent(this, TuRingService.class));
 //        //音乐

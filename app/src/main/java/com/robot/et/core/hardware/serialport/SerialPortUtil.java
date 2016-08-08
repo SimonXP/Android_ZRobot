@@ -1,4 +1,4 @@
-package com.robot.et.service.hardware.serialport;
+package com.robot.et.core.hardware.serialport;
 
 import android.util.Log;
 

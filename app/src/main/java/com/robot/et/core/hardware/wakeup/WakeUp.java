@@ -1,4 +1,4 @@
-package com.robot.et.service.hardware.wakeup;
+package com.robot.et.core.hardware.wakeup;
 
 public class WakeUp {
 	
