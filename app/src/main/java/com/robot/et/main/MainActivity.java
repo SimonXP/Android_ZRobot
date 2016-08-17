@@ -18,6 +18,7 @@ import com.github.rosjava.android_remocons.common_tools.rocon.InteractionsManage
 import com.github.rosjava.android_remocons.common_tools.system.WifiChecker;
 import com.google.common.base.Preconditions;
 import com.robot.et.R;
+import com.robot.et.common.BroadcastAction;
 import com.robot.et.core.hardware.move.ControlMoveService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
 import com.robot.et.core.software.common.receiver.MsgReceiverService;
@@ -86,6 +87,7 @@ public class MainActivity extends RosActivity {
 
         IntentFilter filter=new IntentFilter();
         filter.addAction("com.robot.et.rocon");
+        filter.addAction(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE);
         registerReceiver(receiver, filter);
         prepareAppManager();
     }
@@ -110,6 +112,8 @@ public class MainActivity extends RosActivity {
                 Log.e(TAG,"接收到数据");
                 roconDescription=(RoconDescription)intent.getSerializableExtra("RoconDescription");
                 init2(roconDescription);
+            }else if (intent.getAction().equals(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE)){
+                updateAppList2(availableAppsCache,roconDescription.getCurrentRole());
             }
         }
     };
@@ -262,6 +266,19 @@ public class MainActivity extends RosActivity {
 //                    statusPublisher.update(false, selectedInteraction.getHash(), selectedInteraction.getName());
 //                    Log.e(TAG,"Stop Random Walker  2");
 //                }
+            }
+        }
+    }
+
+    protected void updateAppList2(final ArrayList<Interaction> apps, final String role) {
+        selectedInteraction = null;
+        for (int i=0;i<apps.size();i++){
+            if (apps.get(i).getDisplayName().equals("Random Walker")){
+                Log.e(TAG,"Start Random Walker  1");
+                selectedInteraction = apps.get(i);
+                interactionsManager.requestAppUse(roconDescription.getMasterId(), role, selectedInteraction);
+                statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
+                Log.e(TAG,"Start Random Walker  2");
             }
         }
     }
