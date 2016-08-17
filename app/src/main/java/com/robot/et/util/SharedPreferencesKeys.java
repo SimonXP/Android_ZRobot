@@ -10,6 +10,12 @@ public class SharedPreferencesKeys {
 	public static final String CITY_KEY = "city_key";
 	//定位的区域
 	public static final String AREA_KEY = "area_key";
+	//agora通话的房间号
+	public static final String AGORA_ROOM_NUM = "agora_room_num";
+	//agora通话的类型
+	public static final String AGORA_CALL_TYPE = "agora_call_type";
+	//agora通话的模式   免打扰模式 或正常模式
+	public static final String AGORA_CALL_PATTERN = "agora_call_pattern";
 	//记录agora正在通话的手机号
 	public static final String AGORA_CALL_PHONENUM = "agora_call_phonenum";
 

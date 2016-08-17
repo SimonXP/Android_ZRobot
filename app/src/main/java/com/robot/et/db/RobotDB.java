@@ -1,6 +1,5 @@
 package com.robot.et.db;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -10,6 +9,7 @@ import com.robot.et.entity.LearnQuestionInfo;
 import com.robot.et.entity.RemindInfo;
 import com.robot.et.entity.ScriptActionInfo;
 import com.robot.et.entity.ScriptInfo;
+import com.robot.et.main.CustomApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +21,15 @@ public class RobotDB {
     private RobotDBHelper helper;
     public static RobotDB instance = null;
 
-    private RobotDB(Context context) {
-        helper = new RobotDBHelper(context);
+    private RobotDB() {
+        helper = new RobotDBHelper(CustomApplication.getInstance().getApplicationContext());
     }
 
-    public static RobotDB getInstance(Context context) {
+    public static RobotDB getInstance() {
         if (instance == null) {
             synchronized (RobotDB.class) {
                 if (instance == null) {
-                    instance = new RobotDB(context);
+                    instance = new RobotDB();
                 }
             }
         }

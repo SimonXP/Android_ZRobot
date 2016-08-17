@@ -1,6 +1,5 @@
 package com.robot.et.util;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -21,7 +20,8 @@ public class AlarmRemindManager {
     public static void setAlarmClock(String date, String time) {
         Calendar calendar = DateTools.getCalendar(date, time);
         long currentMinute = System.currentTimeMillis();
-        String action = DateTools.getCurrentDate(currentMinute) + DataConfig.ACTION_REMIND_SIGN + DateTools.getCurrentTime(currentMinute);
+        StringBuffer buffer = new StringBuffer(1024);
+        String action = buffer.append(DateTools.getCurrentDate(currentMinute)).append(DataConfig.ACTION_REMIND_SIGN).append(DateTools.getCurrentTime(currentMinute)).toString();
         AlarmClock.getInstance().setOneAlarm(action, calendar);
     }
 
@@ -29,15 +29,13 @@ public class AlarmRemindManager {
     private static String setAlarmTimeFormat(String time) {
         String result = "";
         if (!TextUtils.isEmpty(time)) {
-            result = time.substring(0, time.length() - 2);
-            result = result + "00";
-            return result;
+            result = time.substring(0, time.length() - 2) + "00";
         }
         return result;
     }
 
     //增加极光推送发来的闹铃
-    public static void addAppAlarmClock(Context context, JpushInfo info) {
+    public static void addAppAlarmClock(JpushInfo info) {
         // yyyy-MM-dd HH:mm:ss
         String alarmTime = info.getAlarmTime();
         String originalTime = alarmTime;
@@ -72,14 +70,14 @@ public class AlarmRemindManager {
                     mInfo.setRemindInt(DataConfig.REMIND_NO_ID);
                     mInfo.setFrequency(frequency);
                     mInfo.setOriginalAlarmTime(originalTime);
-                    addAlarm(context, mInfo);
+                    addAlarm(mInfo);
                 }
             }
         }
     }
 
     //增加App推送来的提醒信息
-    public static void addAppAlarmRemind(Context context, RemindInfo info) {
+    public static void addAppAlarmRemind(RemindInfo info) {
         if (info != null) {
             String alarmTime = info.getOriginalAlarmTime();
             alarmTime = setAlarmTimeFormat(alarmTime);
@@ -95,7 +93,7 @@ public class AlarmRemindManager {
             info.setDate(date);
             info.setTime(time);
             info.setRemindInt(DataConfig.REMIND_NO_ID);
-            addAlarm(context, info);
+            addAlarm(info);
         }
     }
 
@@ -111,12 +109,12 @@ public class AlarmRemindManager {
     }
 
     //获取提醒的内容
-    public static List<RemindInfo> getRemindTips(Context context, long minute) {
+    public static List<RemindInfo> getRemindTips(long minute) {
         String date = DateTools.getCurrentDate(minute);
         int currentHour = DateTools.getCurrentHour(minute);
         String minuteTwo = DateTools.get2DigitMinute(minute);
-        String time = currentHour + ":" + minuteTwo + ":" + "00";
-        RobotDB mDao = RobotDB.getInstance(context);
+        String time = new StringBuffer(1024).append(currentHour).append(":").append(minuteTwo).append(":").append("00").toString();
+        RobotDB mDao = RobotDB.getInstance();
         List<RemindInfo> infos = null;
         try {
             infos = mDao.getRemindInfos(date, time, DataConfig.REMIND_NO_ID);
@@ -128,29 +126,29 @@ public class AlarmRemindManager {
     }
 
     // 更新已经提醒的条目
-    public static void updateRemindInfo(Context context, RemindInfo info, long minute, int frequency) {
+    public static void updateRemindInfo(RemindInfo info, long minute, int frequency) {
         String date = DateTools.getCurrentDate(minute);
-        RobotDB.getInstance(context).updateRemindInfo(info, date, frequency);
+        RobotDB.getInstance().updateRemindInfo(info, date, frequency);
     }
 
     // 删除当前时间提醒的条目
-    public static void deleteCurrentRemindTips(Context context, long minute) {
+    public static void deleteCurrentRemindTips(long minute) {
         String date = DateTools.getCurrentDate(minute);
         int currentHour = DateTools.getCurrentHour(minute);
         String currentMinute = DateTools.get2DigitMinute(minute);
-        String time = currentHour + ":" + currentMinute + ":" + "00";
-        RobotDB.getInstance(context).deleteRemindInfo(date, time, DataConfig.REMIND_NO_ID);
+        String time = new StringBuffer(1024).append(currentHour).append(":").append(currentMinute).append(":").append("00").toString();
+        RobotDB.getInstance().deleteRemindInfo(date, time, DataConfig.REMIND_NO_ID);
     }
 
     // 删除app传来的提醒
-    public static void deleteAppRemindTips(Context context, String originalTime) {
+    public static void deleteAppRemindTips(String originalTime) {
         if (!TextUtils.isEmpty(originalTime)) {
-            RobotDB.getInstance(context).deleteAppRemindInfo(originalTime);
+            RobotDB.getInstance().deleteAppRemindInfo(originalTime);
         }
     }
 
     // 增加Ifly提醒的操作 格式：日期 + 时间 + 做什么事
-    private static boolean addIflyRemind(Context context, String result) {
+    private static boolean addIflyRemind(String result) {
         if (!TextUtils.isEmpty(result)) {
             Log.i(TAG, "chat  answer===" + result);
             String dates[] = result.split(DataConfig.SCHEDULE_SPLITE);
@@ -161,7 +159,7 @@ public class AlarmRemindManager {
             info.setContent(dates[2]);
             info.setRemindInt(DataConfig.REMIND_NO_ID);
             info.setFrequency(1);
-            boolean flag = addAlarm(context, info);
+            boolean flag = addAlarm(info);
             if (flag) {
                 setAlarmClock(dates[0], dates[1]);
             }
@@ -171,8 +169,8 @@ public class AlarmRemindManager {
     }
 
     //讯飞提醒提示
-    public static String getIflyRemindTips(Context context, String result) {
-        boolean flag = addIflyRemind(context, result);
+    public static String getIflyRemindTips(String result) {
+        boolean flag = addIflyRemind(result);
         String content = "";
         if (flag) {
             content = "主人，您的提醒，我已经记下来了";
@@ -186,9 +184,9 @@ public class AlarmRemindManager {
     public static String getMoreAlarmContent() {
         String content = "";
         List<String> datas = getAlarmDatas();
-        Log.i(TAG, "datas.size====" + datas.size());
-        if (datas != null && datas.size() > 0) {
-            int size = datas.size();
+        int size = datas.size();
+        Log.i(TAG, "datas.size====" + size);
+        if (datas != null && size > 0) {
             content = "主人您好，您设置的" + datas.get(size - 1) + "提醒时间到了，不要忘记哦。";
             datas.remove(size - 1);
             setAlarmDatas(datas);
@@ -197,8 +195,8 @@ public class AlarmRemindManager {
     }
 
     //增加闹铃
-    private static boolean addAlarm(Context context, RemindInfo info) {
-        RobotDB mDb = RobotDB.getInstance(context);
+    private static boolean addAlarm(RemindInfo info) {
+        RobotDB mDb = RobotDB.getInstance();
         RemindInfo mInfo = mDb.getRemindInfo(info);
         if (mInfo != null) {
             Log.i(TAG, "闹铃已存在");

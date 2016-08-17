@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 
-import com.robot.et.app.CustomApplication;
+import com.robot.et.main.CustomApplication;
 
 public class SharedPreferencesUtils {
     public static SharedPreferencesUtils instance = null;

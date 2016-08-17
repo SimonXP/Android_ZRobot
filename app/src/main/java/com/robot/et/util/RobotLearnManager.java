@@ -1,6 +1,5 @@
 package com.robot.et.util;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -14,9 +13,9 @@ import java.util.Random;
 public class RobotLearnManager {
 
     // 增加智能学习的问题与答案
-    public static void insertLeanInfo(Context context, String question, String answer, String action, int learnType) {
+    public static void insertLeanInfo(String question, String answer, String action, int learnType) {
         String robotNum = SharedPreferencesUtils.getInstance().getString(SharedPreferencesKeys.ROBOT_NUM, "");
-        RobotDB mDb = RobotDB.getInstance(context);
+        RobotDB mDb = RobotDB.getInstance();
         LearnQuestionInfo info = new LearnQuestionInfo();
         info.setRobotNum(robotNum);
         info.setQuestion(question);
@@ -45,7 +44,7 @@ public class RobotLearnManager {
     }
 
     // 机器人通过人说固定的话来学习要回答的话语
-    public static String learnBySpeak(Context context, int learnType, String questionAndAnswer) {
+    public static String learnBySpeak(int learnType, String questionAndAnswer) {
         String content = "";
         if (!TextUtils.isEmpty(questionAndAnswer)) {
             String question = MatchStringUtil.getQuestion(questionAndAnswer);
@@ -53,7 +52,7 @@ public class RobotLearnManager {
             Log.i("ifly", "quesstion====" + question);
             Log.i("ifly", "answer====" + answer);
             if (!TextUtils.isEmpty(question) && !TextUtils.isEmpty(answer)) {
-                insertLeanInfo(context, question, answer, "", learnType);
+                insertLeanInfo(question, answer, "", learnType);
                 content = "好的，我记住了";
             } else {
                 content = "我好像没学会，再教我一次吧 ";
@@ -64,10 +63,10 @@ public class RobotLearnManager {
     }
 
     //机器人做自己学习的内容
-    public static LearnAnswerInfo getRobotLearnInfo(Context context, String result) {
+    public static LearnAnswerInfo getRobotLearnInfo(String result) {
         LearnAnswerInfo mInfo = new LearnAnswerInfo();
         if (!TextUtils.isEmpty(result)) {
-            RobotDB mDb = RobotDB.getInstance(context);
+            RobotDB mDb = RobotDB.getInstance();
             int questionId = mDb.getQuesstionId(result);
             Log.i("ifly", "学习库里面问题questionId====" + questionId);
             if (questionId != -1) {
@@ -85,14 +84,14 @@ public class RobotLearnManager {
     }
 
     //机器人通过APP学习，（机器人学习库，通过说话学习）
-    public static void learnByAppSpeak(Context context, int learnType, String questionAndAnswer) {
+    public static void learnByAppSpeak(int learnType, String questionAndAnswer) {
         if (!TextUtils.isEmpty(questionAndAnswer)) {
             String question = MatchStringUtil.getQuestion(questionAndAnswer);
             String answer = MatchStringUtil.getAnswer(questionAndAnswer);
             Log.i("ifly", "quesstion===" + question);
             Log.i("ifly", "answer===" + answer);
             if (!TextUtils.isEmpty(question) && !TextUtils.isEmpty(answer)) {
-                insertLeanInfo(context, question, answer, "", learnType);
+                insertLeanInfo(question, answer, "", learnType);
             }
         }
     }

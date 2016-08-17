@@ -25,7 +25,7 @@ public class MatchStringUtil {
     //免打扰关
     public static String disturbCloseRegex = "^" + baseRegex + "*(((免打扰)+" + baseRegex + "*关+)|(关+" + baseRegex + "*(免打扰)+))" + baseRegex + "*$";
     //闭嘴
-    public static String shutUpRegex = "^" + baseRegex + "*((嘴+" + baseRegex + "*闭+)|(闭+" + baseRegex + "*嘴+)|((休息)+))" + baseRegex + "*$";
+    public static String shutUpRegex = "^" + baseRegex + "*((嘴+" + baseRegex + "*闭+)|(闭+" + baseRegex + "*嘴+)|((休息|(睡觉))+))" + baseRegex + "*$";
     //做动作
     public static String doActionRegex = "^" + baseRegex + "*我+" + baseRegex + "*((问)|(说))+" + baseRegex + "*你+" + baseRegex + "+(萌|(卖个萌))+" + baseRegex + "*$";
     //控制机器人周围的玩具车走
@@ -39,7 +39,7 @@ public class MatchStringUtil {
     // 关闭家电
     public static String closeHouseholdRegex = "^" + baseRegex + "*关+" + baseRegex + "*(灯|(插座))+" + baseRegex + "*$";
     // 脸检测
-    public static String faceTestRegex = "^" + baseRegex + "*((猜猜)|(看看))+" + baseRegex + "*(我是谁)+" + baseRegex + "*$";
+    public static String faceTestRegex = "^" + baseRegex + "*(我是谁)+" + baseRegex + "*$";
     // 识别问名字
     public static String faceNameRegex = "^" + baseRegex + "*我+" + baseRegex + "*(叫|是)+" + baseRegex + "+$";
 

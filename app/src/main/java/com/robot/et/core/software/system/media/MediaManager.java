@@ -3,20 +3,22 @@ package com.robot.et.core.software.system.media;
 import android.content.Context;
 import android.media.AudioManager;
 
+import com.robot.et.main.CustomApplication;
+
 //调节系统音量大小
 public class MediaManager {
     private static MediaManager instance = null;
     private AudioManager mAudioManager;
 
-    private MediaManager(Context context) {
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    private MediaManager() {
+        mAudioManager = (AudioManager) CustomApplication.getInstance().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
     }
 
-    public static MediaManager getInstance(Context context) {
+    public static MediaManager getInstance() {
         if (instance == null) {
             synchronized (MediaManager.class) {
                 if (instance == null) {
-                    instance = new MediaManager(context);
+                    instance = new MediaManager();
                 }
             }
         }

@@ -18,8 +18,9 @@ public class MusicManager {
     // 获取播放音频的路径
     public static String getDetailMusicSrc(int fileType, String musicName) {
         String fileSrc = getMusicFile(fileType);
-        fileSrc += File.separator + musicName + ".mp3";
-        return fileSrc;
+        StringBuffer buffer = new StringBuffer(1024);
+        buffer.append(fileSrc).append(File.separator).append(musicName).append(".mp3");
+        return buffer.toString();
     }
 
     // 获取下一首mp3文件的路径
@@ -29,19 +30,21 @@ public class MusicManager {
         Log.i(TAG, "playcontrol  currentMusicName===" + currentMusicName);
         File file = new File(fileSrc);
         String[] names = file.list();
-        if (names != null && names.length > 0) {
-            for (int i = 0; i < names.length; i++) {
+        int length = names.length;
+        if (names != null && length > 0) {
+            StringBuffer buffer = new StringBuffer(1024);
+            for (int i = 0; i < length; i++) {
                 String name = names[i];
                 if (TextUtils.equals(name, currentMusicName)) {
                     if (i == names.length - 1) {
-                        return fileSrc += File.separator + names[0];
+                        return buffer.append(fileSrc).append(File.separator).append(names[0]).toString();
                     }
-                    return fileSrc += File.separator + names[i + 1];
+                    return buffer.append(fileSrc).append(File.separator).append(names[i + 1]).toString();
                 }
             }
         }
 
-        return null;
+        return "";
     }
 
     //获取歌曲路径文件
@@ -87,6 +90,7 @@ public class MusicManager {
     public static String getMusicSpeakContent(int srcType, int mediaType, String result) {
         String content = "";
         String playPrompt = "开始播放";
+        StringBuffer buffer = new StringBuffer(1024);
         if (srcType == DataConfig.MUSIC_SRC_FROM_OTHER) {//第三方
             if (!TextUtils.isEmpty(result)) {
                 if (result.contains(DataConfig.MUSIC_SPLITE)) {
@@ -94,7 +98,8 @@ public class MusicManager {
                     if (datas != null && datas.length > 0) {
                         //歌手+歌名 + 歌曲src
                         setMusicSrc(datas[2]);
-                        content = "好的，" + playPrompt + datas[0] + "：" + datas[1];
+                        buffer.append("好的，").append(playPrompt).append(datas[0]).append("：").append(datas[1]);
+                        content = buffer.toString();
                     }
                 }
             }
@@ -105,19 +110,19 @@ public class MusicManager {
 
             switch (mediaType) {
                 case RequestConfig.JPUSH_MUSIC:
-                    content = playPrompt + result;
+                    content = buffer.append(playPrompt).append(result).toString();
                     break;
                 case RequestConfig.JPUSH_STORY:
-                    content = playPrompt + result;
+                    content = buffer.append(playPrompt).append(result).toString();
                     break;
                 case RequestConfig.JPUSH_SYNCHRONOUS_CLASSROOM:
-                    content = playPrompt + result;
+                    content = buffer.append(playPrompt).append(result).toString();
                     break;
                 case RequestConfig.JPUSH_THOUSANDS_WHY:
-                    content = playPrompt + result;
+                    content = buffer.append(playPrompt).append(result).toString();
                     break;
                 case RequestConfig.JPUSH_ENCYCLOPEDIAS:
-                    content = playPrompt + result;
+                    content = buffer.append(playPrompt).append(result).toString();
                     break;
 
                 default:

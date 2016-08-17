@@ -104,4 +104,18 @@ public class BroadcastEnclosure {
         context.sendBroadcast(intent);
     }
 
+    //连接agora
+    public static void connectAgora(Context context, int type){
+        intent.setAction(BroadcastAction.ACTION_CONNECT_AGORA);
+        intent.putExtra("type", type);
+        context.sendBroadcast(intent);
+    }
+
+    //打开人脸识别
+    public static void openFaceRecognise(Context context, boolean isVoiceFaceRecognise){
+        intent.setAction(BroadcastAction.ACTION_OPEN_FACE_DISTINGUISH);
+        intent.putExtra("isVoiceFaceRecognise", isVoiceFaceRecognise);
+        context.sendBroadcast(intent);
+    }
+
 }

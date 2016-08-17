@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <!-- 4 actions buttons -->
+
+    <LinearLayout
+        android:id="@+id/top_actions_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:minHeight="50dp"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        >
+
+        <!-- 静音 -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/action_muter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="静音"
+                android:textColor="#000"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 扬声器 -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/action_speaker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="扬声器"
+                android:textColor="#000"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 关闭摄像头 -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/close_camera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="关闭摄像头"
+                android:textColor="#000"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 切换摄像头 -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/switch_camera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="切换摄像头"
+                android:textColor="#000"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 视频通话 语音通话切换部分 -->
+
+    <FrameLayout
+        android:id="@+id/bottom_actions_container"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        android:padding="6dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/video"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="视频"
+                android:textColor="#000"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/voice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="语音"
+                android:textColor="#000"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- 本地通话 和 远程通话用户头像列表 -->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_actions_container"
+        android:layout_below="@id/top_actions_container" >
+
+        <FrameLayout
+            android:id="@+id/user_local_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#DCBA75" />
+
+        <ImageView
+            android:id="@+id/user_local_voice_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:id="@+id/user_remote_views"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/wrapper_session_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="20dp"
+            android:background="#80000000"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="5dp"
+            android:visibility="gone"
+             >
+
+            <TextView
+                android:id="@+id/stat_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:singleLine="true"
+                android:textColor="#DCBA75"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/stat_bytes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:background="#FFFFFF"
+                android:singleLine="true"
+                android:textColor="#DCBA75"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/app_notification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Waiting for attendees"
+            android:visibility="gone"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/hung_up"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_above="@id/user_remote_views"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"
+            android:text="挂断"
+            android:visibility="gone"
+            android:textColor="#000"
+            android:textSize="12sp" />
+    </RelativeLayout>
+
+</RelativeLayout>

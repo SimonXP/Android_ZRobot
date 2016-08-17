@@ -3,17 +3,21 @@ package com.robot.et.main;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.robot.et.R;
 import com.robot.et.core.hardware.move.ControlMoveService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
-import com.robot.et.core.software.iflytek.IflySpeakService;
-import com.robot.et.core.software.iflytek.IflyTextUnderstanderService;
-import com.robot.et.core.software.iflytek.IflyVoiceToTextService;
-import com.robot.et.core.software.netty.NettyService;
-import com.robot.et.core.software.system.music.MusicPlayerService;
-import com.robot.et.core.software.turing.TuRingService;
-import com.robot.et.core.software.window.MsgReceiverService;
+import com.robot.et.core.software.common.receiver.MsgReceiverService;
+import com.robot.et.core.software.common.push.netty.NettyService;
+import com.robot.et.core.software.system.media.MusicPlayerService;
+import com.robot.et.core.software.video.agora.AgoraService;
+import com.robot.et.core.software.voice.iflytek.IflySpeakService;
+import com.robot.et.core.software.voice.iflytek.IflyTextUnderstanderService;
+import com.robot.et.core.software.voice.iflytek.IflyVoiceToTextService;
+import com.robot.et.core.software.voice.turing.TuRingService;
+import com.robot.et.util.SharedPreferencesKeys;
+import com.robot.et.util.SharedPreferencesUtils;
 
 import org.ros.android.RosActivity;
 import org.ros.node.NodeMainExecutor;
@@ -30,6 +34,14 @@ public class MainActivity extends RosActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // 保持屏幕常亮
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        //记录城市、区域位置
+        SharedPreferencesUtils share = SharedPreferencesUtils.getInstance();
+        share.putString(SharedPreferencesKeys.CITY_KEY, "上海市");
+        share.putString(SharedPreferencesKeys.AREA_KEY, "浦东新区");
+        share.commitValue();
 
     }
 
@@ -59,6 +71,8 @@ public class MainActivity extends RosActivity {
         startService(new Intent(this, IflySpeakService.class));
         //控制动
         startService(new Intent(this, ControlMoveService.class));
+        //agora
+        startService(new Intent(this, AgoraService.class));
     }
 
     @Override
@@ -83,6 +97,7 @@ public class MainActivity extends RosActivity {
         stopService(new Intent(this, MsgReceiverService.class));
         stopService(new Intent(this, NettyService.class));
         stopService(new Intent(this, ControlMoveService.class));
+        stopService(new Intent(this, AgoraService.class));
     }
 
 }
