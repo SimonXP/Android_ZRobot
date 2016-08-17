@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="common_tools-0.2.0">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.github.rosjava.android_remocons/common_tools/0.2.0/res" />
       <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.github.rosjava.android_remocons/common_tools/0.2.0/jars/libs/snakeyaml-1.10-android.jar!/" />
       <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.github.rosjava.android_remocons/common_tools/0.2.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.github.rosjava.android_remocons/common_tools/0.2.0/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

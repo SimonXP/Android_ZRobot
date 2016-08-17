@@ -31,8 +31,7 @@ public class MasterChooserService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return null;
     }
 
     @Override
@@ -157,16 +156,16 @@ public class MasterChooserService extends Service {
                     }
                     if (index != discoveredMasters.size()) {
                         discoveredMasters.remove(index);
-                        Log.e("MasterListSize", "size:" + discoveredMasters.size());
+                        Log.e("MasterChooserService", "size:" + discoveredMasters.size());
                         if (discoveredMasters.size() == 0) {
                             return;
                         }
                         for (int i = 0; i < discoveredMasters.size(); i++) {
-                            Log.e("MasterListSize", "name:" + discoveredMasters.get(i).name + ",Type:" + discoveredMasters.get(i).type + ",domain:" + discoveredMasters.get(i).domain + ",description:" + discoveredMasters.get(i).description + ",hostname:" + discoveredMasters.get(i).hostname + ",port:" + discoveredMasters.get(i).port + ",ipv4:" + discoveredMasters.get(i).ipv4_addresses);
+                            Log.e("MasterChooserService", "name:" + discoveredMasters.get(i).name + ",Type:" + discoveredMasters.get(i).type + ",domain:" + discoveredMasters.get(i).domain + ",description:" + discoveredMasters.get(i).description + ",hostname:" + discoveredMasters.get(i).hostname + ",port:" + discoveredMasters.get(i).port + ",ipv4:" + discoveredMasters.get(i).ipv4_addresses);
                         }
 //                    discovery_adapter.notifyDataSetChanged();
                     } else {
-                        Log.i("zeroconf", "Tried to remove a non-existant service");
+                        Log.i("MasterChooserService", "Tried to remove a non-existant service");
                     }
                 }
             }
@@ -204,7 +203,7 @@ public class MasterChooserService extends Service {
             Log.e("MasterChooserService","newMasterUri:"+newMasterUri);
         }
         if (newMasterUri != null && newMasterUri.length() > 0) {
-            Log.i("Remocon", newMasterUri);
+            Log.i("MasterChooserService", newMasterUri);
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("URL", newMasterUri);
             try {
@@ -299,6 +298,7 @@ public class MasterChooserService extends Service {
             intent.putExtra("RoconDescription",concert);
             intent.setAction("com.robot.et.rocon");
             sendBroadcast(intent);
+            Log.e("MasterChooserService","sendBroadcast");
 
 
 //            Intent resultIntent = new Intent();

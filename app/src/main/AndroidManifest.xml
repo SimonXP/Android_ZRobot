@@ -64,6 +64,10 @@
         <service android:name=".core.software.common.push.netty.NettyService"/>
         <service android:name=".core.hardware.move.ControlMoveService"/>
         <service android:name=".core.software.video.agora.AgoraService"/>
+        <!--ROS MasterSearchService-->
+        <service android:name=".core.software.ros.MasterChooserService"/>
+
+
 
         <receiver android:name=".core.software.common.receiver.AlarmRemindReceiver" />
 
