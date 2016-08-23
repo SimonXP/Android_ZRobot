@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -26,6 +27,7 @@ import com.robot.et.core.software.common.push.netty.NettyService;
 import com.robot.et.core.software.ros.MasterChooserService;
 import com.robot.et.core.software.ros.PairSubscriber;
 import com.robot.et.core.software.ros.StatusPublisher;
+import com.robot.et.core.software.ros.client.Client;
 import com.robot.et.core.software.system.media.MusicPlayerService;
 import com.robot.et.core.software.video.agora.AgoraService;
 import com.robot.et.core.software.voice.iflytek.IflySpeakService;
@@ -62,6 +64,8 @@ public class MainActivity extends RosActivity {
     private StatusPublisher statusPublisher;
     private PairSubscriber pairSubscriber;
     private boolean validatedConcert;
+    private Client client;
+    private NodeConfiguration nodeConfiguration;
 
     public MainActivity(){
         super("XRobot","Xrobot");//本体的ROS IP和端口
@@ -88,6 +92,7 @@ public class MainActivity extends RosActivity {
         IntentFilter filter=new IntentFilter();
         filter.addAction("com.robot.et.rocon");
         filter.addAction(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE);
+        filter.addAction(BroadcastAction.ACTION_ROS_SERVICE);
         registerReceiver(receiver, filter);
         prepareAppManager();
     }
@@ -104,19 +109,6 @@ public class MainActivity extends RosActivity {
         Log.i("main", "onResume()");
         initService();
     }
-
-    BroadcastReceiver receiver=new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("com.robot.et.rocon")){
-                Log.e(TAG,"接收到数据");
-                roconDescription=(RoconDescription)intent.getSerializableExtra("RoconDescription");
-                init2(roconDescription);
-            }else if (intent.getAction().equals(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE)){
-                updateAppList2(availableAppsCache,roconDescription.getCurrentRole());
-            }
-        }
-    };
 
     void init2(RoconDescription roconDescription) {
         Log.e(TAG,"init2");
@@ -175,14 +167,6 @@ public class MainActivity extends RosActivity {
                     for (int i=0;i<availableAppsCache.size();i++){
                         Log.e(TAG,"DisplayName"+availableAppsCache.get(i).getDisplayName());
                     }
-//                    updateAppList(availableAppsCache, roconDescription.getMasterName(), roconDescription.getCurrentRole());
-
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            updateAppList(availableAppsCache, roconDescription.getMasterName(), roconDescription.getCurrentRole());
-//                        }
-//                    });
                 } else {
                     // TODO: maybe I should notify the user... he will think something is wrong!
                     Log.e(TAG, "No interactions available for the '" + roconDescription.getCurrentRole() + "' role.");
@@ -245,42 +229,6 @@ public class MainActivity extends RosActivity {
             }
         });
         pairSubscriber.setAppHash(0);
-    }
-
-    protected void updateAppList(final ArrayList<Interaction> apps, final String master_name, final String role) {
-        selectedInteraction = null;
-        for (int i=0;i<apps.size();i++){
-            if (apps.get(i).getDisplayName().equals("Random Walker")){
-                Log.e(TAG,"Start Random Walker  1");
-//                selectedInteraction = apps.get(i);
-//                interactionsManager.requestAppUse(roconDescription.getMasterId(), role, selectedInteraction);
-//                statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
-                Log.e(TAG,"Start Random Walker  2");
-
-
-//                try {
-//                    Thread.sleep(20000);
-//                }catch (InterruptedException e){
-//                    e.printStackTrace();
-//                }finally {
-//                    statusPublisher.update(false, selectedInteraction.getHash(), selectedInteraction.getName());
-//                    Log.e(TAG,"Stop Random Walker  2");
-//                }
-            }
-        }
-    }
-
-    protected void updateAppList2(final ArrayList<Interaction> apps, final String role) {
-        selectedInteraction = null;
-        for (int i=0;i<apps.size();i++){
-            if (apps.get(i).getDisplayName().equals("Random Walker")){
-                Log.e(TAG,"Start Random Walker  1");
-                selectedInteraction = apps.get(i);
-                interactionsManager.requestAppUse(roconDescription.getMasterId(), role, selectedInteraction);
-                statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
-                Log.e(TAG,"Start Random Walker  2");
-            }
-        }
     }
 
     public void validateConcert(final MasterId id) {
@@ -382,7 +330,7 @@ public class MainActivity extends RosActivity {
             java.net.Socket socket = new java.net.Socket(getMasterUri().getHost(), getMasterUri().getPort());
             java.net.InetAddress local_network_address = socket.getLocalAddress();
             socket.close();
-            NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(local_network_address.getHostAddress(), getMasterUri());
+            nodeConfiguration = NodeConfiguration.newPublic(local_network_address.getHostAddress(), getMasterUri());
             interactionsManager.init(roconDescription.getInteractionsNamespace());
             interactionsManager.getAppsForRole(roconDescription.getMasterId(), roconDescription.getCurrentRole());
             interactionsManager.setRemoconName(statusPublisher.REMOCON_FULL_NAME);
@@ -398,15 +346,74 @@ public class MainActivity extends RosActivity {
                 // If we come back from an app, it should be already initialized, so call execute again would crash
                 nodeMainExecutorService.execute(pairSubscriber, nodeConfiguration.setNodeName(pairSubscriber.NODE_NAME));
             }
+            client=new Client();
+//            nodeMainExecutor.execute(client,nodeConfiguration);
         } catch (IOException e) {
             // Socket problem
         }
     }
 
+    BroadcastReceiver receiver=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.robot.et.rocon")){
+                Log.e(TAG,"接收到数据");
+                roconDescription=(RoconDescription)intent.getSerializableExtra("RoconDescription");
+                init2(roconDescription);
+            }else if (intent.getAction().equals(BroadcastAction.ACTION_ROS_SERVICE)){
+                Log.e(TAG,"接收到ROS数据");
+                String flag=intent.getStringExtra("rosKey");
+                if (TextUtils.equals("Roaming",flag)){
+                    doMoveAction(availableAppsCache,roconDescription.getCurrentRole(),flag);
+                    try {
+                        Thread.sleep(50000);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }finally {
+                        doStopAction();
+                    }
+                }else if (TextUtils.equals("Stop",flag)){
+                    doStopAction();
+                }else if (TextUtils.equals("AddTWO",flag)){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            nodeMainExecutorService.execute(client,nodeConfiguration.setNodeName("Client"));
+                        }
+                    }).start();
+                }
+            }
+        }
+    };
+
+    protected void doMoveAction(final ArrayList<Interaction> apps, final String role,final String displayName){
+        selectedInteraction = null;
+        for (int i=0;i<apps.size();i++){
+            Log.e(TAG, "InteractionDisplayName:"+apps.get(i).getDisplayName());
+            if (apps.get(i).getDisplayName().equals(displayName)) {
+                Log.e(TAG, "Start"+displayName);
+                selectedInteraction = apps.get(i);
+                interactionsManager.requestAppUse(roconDescription.getMasterId(), role, selectedInteraction);
+                statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
+                Log.e(TAG, "Start2"+displayName);
+            }
+        }
+    }
+    protected void doStopAction(){
+        pairSubscriber.setAppHash(0);
+        statusPublisher.update(false, 0, null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.nodeMainExecutorService.forceShutdown();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
+        unregisterReceiver(receiver);
         destoryService();
     }
 

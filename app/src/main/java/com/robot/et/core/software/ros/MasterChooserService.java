@@ -112,8 +112,8 @@ public class MasterChooserService extends Service {
                         }
                         for (int i = 0; i < discoveredMasters.size(); i++) {
                             Log.e("MasterChooserService", "name:" + discoveredMasters.get(i).name + ",Type:" + discoveredMasters.get(i).type + ",domain:" + discoveredMasters.get(i).domain + ",description:" + discoveredMasters.get(i).description + ",hostname:" + discoveredMasters.get(i).hostname + ",port:" + discoveredMasters.get(i).port + ",ipv4:" + discoveredMasters.get(i).ipv4_addresses);
-                            if ("192.168.2.191".equals(discoveredMasters.get(i).ipv4_addresses.get(0))){
-                                Log.e("MasterChooserService","找到：192.168.2.191");
+                            if ("192.168.2.105".equals(discoveredMasters.get(i).ipv4_addresses.get(0))){
+                                Log.e("MasterChooserService","找到：192.168.2.105");
                                 enterMasterInfo(discoveredMasters.get(i));
                             }
                         }
@@ -248,6 +248,7 @@ public class MasterChooserService extends Service {
                 masterItems.add(new MasterItem(masters.get(i), this));
             }
         }
+        //bug：当时没有获取到NameSpace，所以在这里面等待了5秒
         try {
             Thread.sleep(5000);
         }catch (InterruptedException e){
@@ -285,6 +286,7 @@ public class MasterChooserService extends Service {
     private void choose(int position) {
         Log.e("MasterChooserService","position:"+position);
         RoconDescription concert = masters.get(position);
+        concert.setInteractionsNamespace("/interactions");
         Log.e("MasterChooserService","InteractionsNamespace:"+concert.getInteractionsNamespace());
         if (concert == null || concert.getConnectionStatus() == null || concert.getConnectionStatus().equals(RoconDescription.ERROR)) {
             Log.e("MasterChooserService","Error!,Failed: Cannot contact concert");
@@ -292,19 +294,11 @@ public class MasterChooserService extends Service {
             Log.e("MasterChooserService","Master Unavailable!,Currently busy serving another.");
         } else {
             Log.e("MasterChooserService","Master available!,SUCCESS");
-
-
             Intent intent=new Intent();
             intent.putExtra("RoconDescription",concert);
             intent.setAction("com.robot.et.rocon");
             sendBroadcast(intent);
             Log.e("MasterChooserService","sendBroadcast");
-
-
-//            Intent resultIntent = new Intent();
-//            resultIntent.putExtra(RoconDescription.UNIQUE_KEY, concert);
-//            setResult(RESULT_OK, resultIntent);
-//            finish();
         }
     }
 }

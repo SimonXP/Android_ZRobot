@@ -5,7 +5,10 @@ import android.text.TextUtils;
 import com.robot.et.common.enums.ControlMoveEnum;
 import com.robot.et.common.enums.EmotionEnum;
 import com.robot.et.common.enums.MatchSceneEnum;
+import com.robot.et.common.enums.RosServiceEnum;
 import com.robot.et.common.enums.SceneServiceEnum;
+
+import org.ros.android.RosActivity;
 
 import java.util.Random;
 
@@ -44,6 +47,19 @@ public class EnumManager {
             }
         }
         return moveKey;
+    }
+
+    //获取控制运动的key
+    public static String getRosServiceKey(String str) {
+        String rosKey = "";
+        if (!TextUtils.isEmpty(str)) {
+            for (RosServiceEnum rosServiceEnum : RosServiceEnum.values()) {
+                if (str.contains(rosServiceEnum.getServiceName())) {
+                    rosKey = rosServiceEnum.getServiceKey();
+                }
+            }
+        }
+        return rosKey;
     }
 
     //获取表情的int型值

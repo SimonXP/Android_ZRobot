@@ -60,6 +60,10 @@ public class CommandHandler {
                 return true;
             }
 
+            if (isRosService(result)) {
+                return true;
+            }
+
             if (isCustomDialogue(result)) {
                 return true;
             }
@@ -236,6 +240,19 @@ public class CommandHandler {
         return false;
     }
 
+    //是否ros服务
+    public boolean isRosService(String result) {
+        if (!TextUtils.isEmpty(result)) {
+            String rosKey = EnumManager.getRosServiceKey(result);
+            Log.i("ros", "rosKey===" + rosKey);
+            if (!TextUtils.isEmpty(rosKey)) {
+                sendRos(rosKey);
+                return  true;
+            }
+        }
+        return false;
+    }
+
     //是否是自定义问答
     public boolean isCustomDialogue(String result) {
         String[] questions = context.getResources().getStringArray(R.array.custom_question);
@@ -332,6 +349,15 @@ public class CommandHandler {
         intent.putExtra("direction", direction);
         context.sendBroadcast(intent);
     }
+
+    //ros的广播
+    private void sendRos(String rosKey) {
+        Intent intent = new Intent();
+        intent.setAction(BroadcastAction.ACTION_ROS_SERVICE);
+        intent.putExtra("rosKey", rosKey);
+        context.sendBroadcast(intent);
+    }
+
 
     //APP发来的提醒需求处理
     private void handleAppRemind(String result) {
