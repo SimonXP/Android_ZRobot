@@ -120,12 +120,6 @@ public class MainActivity extends RosActivity {
         prepareAppManager();
     }
 
-    @Override
-    public void startMasterChooser() {
-        Log.e(TAG,"开始执行MasterChooserService");
-        startService(new Intent(this, MasterChooserService.class));
-    }
-
     private void initView() {
         LinearLayout showText = (LinearLayout) findViewById(R.id.ll_show_text);
         LinearLayout showEmotion = (LinearLayout) findViewById(R.id.ll_show_emotion);
@@ -151,6 +145,37 @@ public class MainActivity extends RosActivity {
         SpectrumManager.setView(showMusicView, visualizerView);
         OneImgManager.setView(showOneImg, imageView);
     }
+
+    private void initService() {
+        //netty
+//        startService(new Intent(this, NettyService.class));
+        //语音听写
+        startService(new Intent(this, IflyVoiceToTextService.class));
+        //文本理解
+        startService(new Intent(this, IflyTextUnderstanderService.class));
+        //图灵
+        startService(new Intent(this, TuRingService.class));
+        //音乐
+        startService(new Intent(this, MusicPlayerService.class));
+        //唤醒
+        startService(new Intent(this, WakeUpServices.class));
+        //接受发来的消息
+        startService(new Intent(this, MsgReceiverService.class));
+        //语音合成
+        startService(new Intent(this, IflySpeakService.class));
+        //控制动
+        startService(new Intent(this, ControlMoveService.class));
+        //agora
+        startService(new Intent(this, AgoraService.class));
+        startService(new Intent(this, SerialPortService.class));
+    }
+
+    @Override
+    public void startMasterChooser() {
+        Log.e(TAG,"开始执行MasterChooserService");
+        startService(new Intent(this, MasterChooserService.class));
+    }
+
 
     void init2(RoconDescription roconDescription) {
         Log.e(TAG,"init2");
@@ -340,30 +365,6 @@ public class MainActivity extends RosActivity {
                 return null;
             }
         }.execute();
-    }
-
-    private void initService() {
-        //netty
-//        startService(new Intent(this, NettyService.class));
-        //语音听写
-        startService(new Intent(this, IflyVoiceToTextService.class));
-        //文本理解
-        startService(new Intent(this, IflyTextUnderstanderService.class));
-        //图灵
-        startService(new Intent(this, TuRingService.class));
-        //音乐
-        startService(new Intent(this, MusicPlayerService.class));
-        //唤醒
-        startService(new Intent(this, WakeUpServices.class));
-        //接受发来的消息
-        startService(new Intent(this, MsgReceiverService.class));
-        //语音合成
-        startService(new Intent(this, IflySpeakService.class));
-        //控制动
-        startService(new Intent(this, ControlMoveService.class));
-        //agora
-        startService(new Intent(this, AgoraService.class));
-        startService(new Intent(this, SerialPortService.class));
     }
 
     @Override
