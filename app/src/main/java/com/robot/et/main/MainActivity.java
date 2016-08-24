@@ -86,11 +86,12 @@ public class MainActivity extends RosActivity {
     private MoveControler mover;
 
     public MainActivity(){
-        super("XRobot","Xrobot",URI.create("http://192.168.2.105:11311"));//本体的ROS IP和端口
-//        availableAppsCache = new ArrayList<Interaction>();
-//        statusPublisher = StatusPublisher.getInstance();
-//        pairSubscriber= PairSubscriber.getInstance();
-//        pairSubscriber.setAppHash(0);
+//        super("XRobot","Xrobot",URI.create("http://192.168.2.105:11311"));//本体的ROS IP和端口
+        super("XRobot","Xrobot");//本体的ROS IP和端口
+        availableAppsCache = new ArrayList<Interaction>();
+        statusPublisher = StatusPublisher.getInstance();
+        pairSubscriber= PairSubscriber.getInstance();
+        pairSubscriber.setAppHash(0);
     }
 
     @Override
@@ -116,13 +117,13 @@ public class MainActivity extends RosActivity {
         filter.addAction(BroadcastAction.ACTION_ROBOT_RADAR);
         filter.addAction(BroadcastAction.ACTION_WAKE_UP_TURN_BY_DEGREE);
         registerReceiver(receiver, filter);
-//        prepareAppManager();
+        prepareAppManager();
     }
 
     @Override
     public void startMasterChooser() {
         Log.e(TAG,"开始执行MasterChooserService");
-//        startService(new Intent(this, MasterChooserService.class));
+        startService(new Intent(this, MasterChooserService.class));
     }
 
     private void initView() {
@@ -368,13 +369,15 @@ public class MainActivity extends RosActivity {
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
         Log.e(TAG,"init(NodeMainExecutor nodeMainExecutor)");
+        mover = new MoveControler();
+        mover.isPublishVelocity(false);
         try {
             java.net.Socket socket = new java.net.Socket(getMasterUri().getHost(), getMasterUri().getPort());
             java.net.InetAddress local_network_address = socket.getLocalAddress();
             socket.close();
             nodeConfiguration = NodeConfiguration.newPublic(local_network_address.getHostAddress(), getMasterUri());
-            mover=new MoveControler();
-            /*interactionsManager.init(roconDescription.getInteractionsNamespace());
+
+            interactionsManager.init(roconDescription.getInteractionsNamespace());
             interactionsManager.getAppsForRole(roconDescription.getMasterId(), roconDescription.getCurrentRole());
             interactionsManager.setRemoconName(statusPublisher.REMOCON_FULL_NAME);
             //execution of publisher
@@ -388,7 +391,9 @@ public class MainActivity extends RosActivity {
             if (! pairSubscriber.isInitialized()) {
                 // If we come back from an app, it should be already initialized, so call execute again would crash
                 nodeMainExecutorService.execute(pairSubscriber, nodeConfiguration.setNodeName(pairSubscriber.NODE_NAME));
-            }*/
+            }
+            //nodeMainExecutor是否可以换做nodeMainExecutorService（待测试）
+            nodeMainExecutor.execute(mover, nodeConfiguration);
         } catch (IOException e) {
             // Socket problem
         }
@@ -409,12 +414,12 @@ public class MainActivity extends RosActivity {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            doMoveAction(availableAppsCache,roconDescription.getCurrentRole(),"Roaming");
+                            doRappControlAction(availableAppsCache,roconDescription.getCurrentRole(),"Roaming");
                             return null;
                         }
                     }.execute();
                 }else if (TextUtils.equals("Stop",flag)){
-                    doStopAction();
+                    doRappControlAction();
                 }else if (TextUtils.equals("AddTWO",flag)){
                     Log.e("AddTWO","Start AddTWO");
                     client=new Client();
@@ -437,7 +442,7 @@ public class MainActivity extends RosActivity {
                     nodeMainExecutorService.execute(visualClient,nodeConfiguration.setNodeName("visualClient"));
                 }
             }else if (intent.getAction().equals(BroadcastAction.ACTION_ROBOT_RADAR)){
-                doRobotMoveAction("5");
+                doMoveAction("5");
             }else  if (intent.getAction().equals(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE)){
                 //此部分代码暂时这样修改，待完善。（时间太赶）2016-07-16
                 String direction= String.valueOf(intent.getIntExtra("direction", 0));
@@ -448,20 +453,26 @@ public class MainActivity extends RosActivity {
                     return;
                 }
                 if (TextUtils.equals("1",direction)||TextUtils.equals("2",direction)){
-                    doRobotMoveAction(direction);
+                    doMoveAction(direction);
                 }else if (TextUtils.equals("3",direction)){
-//                    doTrunAction(mover.getCurrentDegree(),270);
+                    doTrunAction(mover.getCurrentDegree(),270);
                 }else if (TextUtils.equals("4",direction)){
-//                    doTrunAction(mover.getCurrentDegree(),90);
+                    doTrunAction(mover.getCurrentDegree(),90);
                 }
             } else if (intent.getAction().equals(BroadcastAction.ACTION_WAKE_UP_TURN_BY_DEGREE)){
-                int degree = intent.getIntExtra("degree", 0);
-                Log.i("ROS_MOVE","语音唤醒时得到的角度degree===" + degree);
+                Log.i("ROS_WAKE_UP","语音唤醒时，当前机器人的角度："+mover.getCurrentDegree());
+                int data=intent.getIntExtra("degree",0);//获取的Brocast传递的角度
+                Log.i("ROS_WAKE_UP_DEGREE","语音唤醒时，获取的角度："+data);
+                if (data == 0 || data == 360){
+                    //原地不动
+                    return;
+                }
+                doTrunAction(mover.getCurrentDegree(),Double.valueOf(data));
             }
         }
     };
 
-    private void doRobotMoveAction(String message) {
+    private void doMoveAction(String message) {
         mover.isPublishVelocity(true);
         if (TextUtils.equals("1", message)) {
             Log.i("ROS_MOVE", "机器人移动方向:向前");
@@ -481,7 +492,24 @@ public class MainActivity extends RosActivity {
         }
     }
 
-    protected void doMoveAction(final ArrayList<Interaction> apps, final String role,final String displayName){
+    public void doTrunAction(double currentDegree,double degree){
+        mover.isPublishVelocity(true);
+        double temp;
+        if (currentDegree+degree<=180){
+            temp=currentDegree+degree;
+        }else {
+            temp=currentDegree+degree-360;
+        }
+        if ((degree > 0 && degree < 180)){
+            mover.execTurnRight();
+            mover.setDegree(temp);
+        }else{
+            mover.execTurnLeft();
+            mover.setDegree(temp);
+        }
+    }
+
+    protected void doRappControlAction(final ArrayList<Interaction> apps, final String role,final String displayName){
         selectedInteraction = null;
         for (int i=0;i<apps.size();i++){
             Log.e(TAG, "InteractionDisplayName:"+apps.get(i).getDisplayName());
@@ -494,7 +522,7 @@ public class MainActivity extends RosActivity {
             }
         }
     }
-    protected void doStopAction(){
+    protected void doRappControlAction(){
         pairSubscriber.setAppHash(0);
         statusPublisher.update(false, 0, null);
     }
