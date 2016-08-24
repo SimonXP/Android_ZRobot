@@ -26,6 +26,10 @@
     <!-- 显示音乐频谱的权限 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
 
+    <!-- 蓝牙的权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -60,6 +64,12 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 
+        <activity
+            android:name=".core.software.bluetooth.DeviceListActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Holo.Dialog"/>
+
         <service android:name=".core.software.voice.iflytek.IflySpeakService" />
         <service android:name=".core.software.voice.iflytek.IflyTextUnderstanderService" />
         <service android:name=".core.software.voice.iflytek.IflyVoiceToTextService" />
@@ -69,6 +79,7 @@
         <service android:name=".core.software.common.receiver.MsgReceiverService"/>
         <service android:name=".core.software.common.push.netty.NettyService"/>
         <service android:name=".core.hardware.move.ControlMoveService"/>
+        <service android:name=".core.hardware.move.BluthControlMoveService"/>
         <service android:name=".core.software.video.agora.AgoraService"/>
         <service android:name=".core.hardware.serialport.SerialPortService"/>
 

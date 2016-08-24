@@ -19,6 +19,8 @@ public class BroadcastAction {
 
     //串口数据接收
     public static String ACTION_MOVE_TO_SERIALPORT ="action.control.robot.serialport";
+    //蓝牙数据接收
+    public static String ACTION_MOVE_TO_BLUTH ="action.control.robot.bluth";
     //唤醒,打断或者转向的广播
     public static String ACTION_WAKE_UP_OR_INTERRUPT = "action.wake.up.or.interrupt";
     //唤醒后转身

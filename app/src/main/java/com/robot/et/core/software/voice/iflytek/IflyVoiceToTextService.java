@@ -20,6 +20,7 @@ import com.robot.et.common.DataConfig;
 import com.robot.et.core.software.common.speech.CommandHandler;
 import com.robot.et.core.software.common.speech.SpeechImpl;
 import com.robot.et.core.software.common.view.EmotionManager;
+import com.robot.et.core.software.common.view.OneImgManager;
 import com.robot.et.core.software.common.view.TextManager;
 import com.robot.et.core.software.voice.SpeechService;
 import com.robot.et.core.software.voice.iflytek.util.ResultParse;
@@ -165,6 +166,7 @@ public class IflyVoiceToTextService extends SpeechService {
                     stopTimer();
                     isFirstListen = false;
 
+                    OneImgManager.showImgLinearLayout(false);
                     EmotionManager.showEmotionLinearLayout(false);
                     TextManager.showText(result);
 
