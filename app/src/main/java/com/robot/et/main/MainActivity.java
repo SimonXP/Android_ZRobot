@@ -26,9 +26,9 @@ import com.robot.et.R;
 import com.robot.et.common.BroadcastAction;
 import com.robot.et.common.DataConfig;
 import com.robot.et.core.hardware.move.ControlMoveService;
+import com.robot.et.core.hardware.serialport.SerialPortService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
 import com.robot.et.core.software.common.receiver.MsgReceiverService;
-import com.robot.et.core.software.common.push.netty.NettyService;
 import com.robot.et.core.software.common.speech.SpeechImpl;
 import com.robot.et.core.software.common.view.CustomTextView;
 import com.robot.et.core.software.common.view.EmotionManager;
@@ -86,11 +86,11 @@ public class MainActivity extends RosActivity {
     private MoveControler mover;
 
     public MainActivity(){
-        super("XRobot","Xrobot");//本体的ROS IP和端口
-        availableAppsCache = new ArrayList<Interaction>();
-        statusPublisher = StatusPublisher.getInstance();
-        pairSubscriber= PairSubscriber.getInstance();
-        pairSubscriber.setAppHash(0);
+        super("XRobot","Xrobot",URI.create("http://192.168.2.105:11311"));//本体的ROS IP和端口
+//        availableAppsCache = new ArrayList<Interaction>();
+//        statusPublisher = StatusPublisher.getInstance();
+//        pairSubscriber= PairSubscriber.getInstance();
+//        pairSubscriber.setAppHash(0);
     }
 
     @Override
@@ -361,6 +361,7 @@ public class MainActivity extends RosActivity {
         startService(new Intent(this, ControlMoveService.class));
         //agora
         startService(new Intent(this, AgoraService.class));
+        startService(new Intent(this, SerialPortService.class));
     }
 
     @Override
@@ -435,10 +436,10 @@ public class MainActivity extends RosActivity {
                     nodeMainExecutorService.execute(visualClient,nodeConfiguration.setNodeName("visualClient"));
                 }
             }else if (intent.getAction().equals(BroadcastAction.ACTION_ROBOT_RADAR)){
-
+                doRobotMoveAction("5");
             }else  if (intent.getAction().equals(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE)){
                 //此部分代码暂时这样修改，待完善。（时间太赶）2016-07-16
-                String direction=intent.getStringExtra("direction");
+                String direction= String.valueOf(intent.getIntExtra("direction", 0));
                 Log.i("ROS_MOVE","语音控制时，得到的direction参数："+direction);
                 String digit=intent.getStringExtra("digit");
                 Log.i("ROS_MOVE","语音控制时，得到的digit参数："+digit);
@@ -518,6 +519,7 @@ public class MainActivity extends RosActivity {
 //        stopService(new Intent(this, NettyService.class));
         stopService(new Intent(this, ControlMoveService.class));
         stopService(new Intent(this, AgoraService.class));
+        stopService(new Intent(this, SerialPortService.class));
 
         stopService(new Intent(this, MasterChooserService.class));
     }

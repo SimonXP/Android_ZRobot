@@ -18,7 +18,7 @@ public class SerialPortUtil {
 	private OutputStream mOutputStream;
 	private InputStream mInputStream;
 	private ReadThread mReadThread;
-	private String path = "/dev/ttyAMA3";
+	private String path = "/dev/ttyAMA2";
 	private int baudrate = 115200;
 	private static SerialPortUtil portUtil;
 	private OnDataReceiveListener onDataReceiveListener = null;

@@ -381,19 +381,18 @@ public class CommandHandler {
     public boolean isRosService(String result) {
         String content = "";
         if (!TextUtils.isEmpty(result)) {
-            SpeechImpl.getInstance().startListen();
-            EmotionManager.showEmotion(R.mipmap.emotion_normal);
             if (result.contains("这是")) {
                 int start = result.indexOf("是");
                 content = result.substring(start + 1, result.length());
                 sendRos("VisualLearn",content);
+                SpeechImpl.getInstance().startListen();
                 return true;
             }else {
                 String rosKey = EnumManager.getRosServiceKey(result);
                     Log.i("ros", "rosKey===" + rosKey);
                     if (!TextUtils.isEmpty(rosKey)) {
                         sendRos(rosKey,"");
-                        return true;
+                        return false;
                     }
             }
         }
