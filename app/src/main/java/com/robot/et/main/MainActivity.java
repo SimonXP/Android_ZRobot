@@ -114,6 +114,7 @@ public class MainActivity extends RosActivity {
         filter.addAction(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE);
         filter.addAction(BroadcastAction.ACTION_ROS_SERVICE);
         filter.addAction(BroadcastAction.ACTION_ROBOT_RADAR);
+        filter.addAction(BroadcastAction.ACTION_WAKE_UP_TURN_BY_DEGREE);
         registerReceiver(receiver, filter);
 //        prepareAppManager();
     }
@@ -453,6 +454,9 @@ public class MainActivity extends RosActivity {
                 }else if (TextUtils.equals("4",direction)){
 //                    doTrunAction(mover.getCurrentDegree(),90);
                 }
+            } else if (intent.getAction().equals(BroadcastAction.ACTION_WAKE_UP_TURN_BY_DEGREE)){
+                int degree = intent.getIntExtra("degree", 0);
+                Log.i("ROS_MOVE","语音唤醒时得到的角度degree===" + degree);
             }
         }
     };
