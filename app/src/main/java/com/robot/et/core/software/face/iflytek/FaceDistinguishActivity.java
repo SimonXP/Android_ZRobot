@@ -361,6 +361,8 @@ public class FaceDistinguishActivity extends Activity {
             mAcc.stop();
         }
         mStopTrack = true;
+        //灯灭
+        BroadcastEnclosure.controlMouthLED(this, ScriptConfig.LED_OFF);
     }
 
     @Override
@@ -370,9 +372,6 @@ public class FaceDistinguishActivity extends Activity {
         mFaceDetector.destroy();
         DataConfig.isFaceRecogniseIng = false;
         DataConfig.isVoiceFaceRecognise = false;
-        //灯灭
-        BroadcastEnclosure.controlMouthLED(this, ScriptConfig.LED_OFF);
-
     }
 
     //脸部识别后的处理

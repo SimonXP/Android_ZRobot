@@ -34,7 +34,6 @@ import com.robot.et.core.hardware.move.BluthControlMoveService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
 import com.robot.et.core.software.bluetooth.BluetoothChatService;
 import com.robot.et.core.software.bluetooth.BluetoothConfig;
-import com.robot.et.core.software.bluetooth.DeviceListActivity;
 import com.robot.et.core.software.common.receiver.MsgReceiverService;
 import com.robot.et.core.software.common.view.CustomTextView;
 import com.robot.et.core.software.common.view.EmotionManager;
@@ -517,6 +516,7 @@ public class MainActivity extends RosActivity {
             if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
                 mChatService.start();
             }
+            connectBluth();
         }
     }
 
@@ -575,8 +575,10 @@ public class MainActivity extends RosActivity {
                     String mConnectedDeviceName = msg.getData().getString(BluetoothConfig.DEVICE_NAME);
                     Log.i("bluth", "MESSAGE_DEVICE_NAME mConnectedDeviceName===" + mConnectedDeviceName);
                     break;
-                case BluetoothConfig.MESSAGE_TOAST://吐司
+                case BluetoothConfig.MESSAGE_TOAST://通知蓝牙连接断开
                     Log.i("bluth", "MESSAGE_TOAST===" + msg.getData().getString(BluetoothConfig.TOAST));
+                    connectBluth();
+
                     break;
             }
         }
@@ -608,8 +610,12 @@ public class MainActivity extends RosActivity {
     }
 
     private void connectBluth() {
-        Intent intent = new Intent(this, DeviceListActivity.class);
-        startActivityForResult(intent, BluetoothConfig.REQUEST_CONNECT_DEVICE_SECURE);
+//        Intent intent = new Intent(this, DeviceListActivity.class);
+//        startActivityForResult(intent, BluetoothConfig.REQUEST_CONNECT_DEVICE_SECURE);
+        String address = "20:16:06:20:65:84";
+        boolean secure = true;
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        mChatService.connect(device, secure);
     }
 
     @Override
