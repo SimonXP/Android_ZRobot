@@ -20,5 +20,7 @@ public class UrlConfig {
     public final static String PUSH_MESSAGE_TO_APP = URL_PATH + "pushToApp/pushMsgToApp";
     //单个或多个文件上传
     public final static String UPLOAD_FILE_PATH = URL_PATH + "file/upload";
+    //拍照后文件上传
+    public final static String UPLOAD_PHOTOGRAPH_FILE_PATH = URL_PATH + "robotPicture/upload";
 
 }

@@ -1,5 +1,6 @@
 package com.robot.et.core.software.common.network;
 
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -7,6 +8,7 @@ import com.robot.et.common.DataConfig;
 import com.robot.et.common.RequestConfig;
 import com.robot.et.common.UrlConfig;
 import com.robot.et.core.software.common.network.okhttp.HttpEngine;
+import com.robot.et.util.FileUtils;
 import com.robot.et.util.SharedPreferencesKeys;
 import com.robot.et.util.SharedPreferencesUtils;
 import com.squareup.okhttp.Call;
@@ -14,6 +16,7 @@ import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -201,6 +204,43 @@ public class HttpManager {
             }
 
         });
+    }
+
+    //上传文件
+    public static void uploadFile(Bitmap bitmap) {
+        String robotNum = SharedPreferencesUtils.getInstance().getString(SharedPreferencesKeys.ROBOT_NUM, "80000082");
+        HttpEngine.Param[] params = new HttpEngine.Param[]{
+                new HttpEngine.Param("robotNumber", robotNum)
+        };
+        String[] fileKeys = new String[]{"file"};
+        String fileName = robotNum + "_" + System.currentTimeMillis() + ".png";
+        FileUtils.saveFilePath(bitmap, fileName);
+        File[] files = FileUtils.getFiles(FileUtils.getFilePath(fileName));
+        Log.i(TAG, "filePath====" + FileUtils.getFilePath(fileName));
+        HttpEngine httpEngine = HttpEngine.getInstance();
+        Request request;
+        try {
+            request = httpEngine.createRequest(UrlConfig.UPLOAD_PHOTOGRAPH_FILE_PATH, files, fileKeys, params);
+            Call call = httpEngine.createRequestCall(request);
+            call.enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Request arg0, IOException arg1) {
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    String result = response.body().string();
+                    Log.i(TAG, "result====" + result);
+                    if (NetResultParse.isSuccess(result)) {
+                        Log.i(TAG, "上传成功");
+                    }
+                }
+
+            });
+        } catch (IOException e) {
+            Log.i(TAG, "uploadFile  IOException");
+        }
     }
 
 }

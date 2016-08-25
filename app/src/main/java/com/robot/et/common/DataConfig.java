@@ -137,6 +137,8 @@ public class DataConfig {
 
     //是否是语音打开人脸识别
     public static boolean isVoiceFaceRecognise  = false;
+    //是否是自动拍照
+    public static boolean isTakePicture  = false;
 
     //控制头转向的方向  0:左右  1:上下
     public final static int TURN_HEAD_ABOUT = 0;

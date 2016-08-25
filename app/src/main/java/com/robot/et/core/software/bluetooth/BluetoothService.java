@@ -19,7 +19,9 @@ import com.robot.et.common.BroadcastAction;
  * Created by houdeming on 2016/8/25.
  */
 public class BluetoothService extends Service {
-    private final String BLUE_ADDRESS = "20:16:06:20:65:84";
+    //robot2    20:16:06:20:65:84
+    //autorobot3    98:D3:31:B0:C6:48
+    private final String BLUE_ADDRESS = "98:D3:31:B0:C6:48";
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothChatService mChatService;
 

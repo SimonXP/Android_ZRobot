@@ -220,6 +220,8 @@ public class CommandHandler {
             case PHOTOGRAPH_SCENE:// 拍照
                 flag = true;
                 SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "好的");
+                DataConfig.isTakePicture = true;
+                BroadcastEnclosure.openFaceRecognise(context, true);
 
                 break;
             case VISION_LEARN_SCENE:// 视觉学习
