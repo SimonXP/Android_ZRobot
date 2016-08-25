@@ -463,17 +463,16 @@ public class CommandHandler {
     }
 
     //手臂
-    private void hand(int num, String handCategory) {
+    private void hand(int num, final String handCategory) {
         BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_UP, handCategory, "0");
-        while (true) {
-            num++;
-            if (num == 150) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
                 BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_DOWN, handCategory, "0");
-                EmotionManager.showEmotion(R.mipmap.emotion_normal);
-                SpeechImpl.getInstance().startListen();
-                return;
             }
-        }
+        }, 1500);
+        EmotionManager.showEmotion(R.mipmap.emotion_normal);
+        SpeechImpl.getInstance().startListen();
     }
 
     //控制移动的时候，随机回答内容

@@ -21,9 +21,10 @@ import com.robot.et.common.BroadcastAction;
 public class BluetoothService extends Service {
     //robot2    20:16:06:20:65:84
     //autorobot3    98:D3:31:B0:C6:48
-    private final String BLUE_ADDRESS = "98:D3:31:B0:C6:48";
+    private final String BLUE_ADDRESS = "20:16:06:20:65:84";
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothChatService mChatService;
+    private boolean isBreak;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -40,15 +41,25 @@ public class BluetoothService extends Service {
                 mBluetoothAdapter.enable();
             }
             mChatService = new BluetoothChatService(this, mHandler);
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-                mChatService.start();
-            }
+            startChatService();
             connectBluth();
         }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BroadcastAction.ACTION_MOVE_TO_BLUTH);
         registerReceiver(receiver, filter);
+    }
+
+    private void startChatService() {
+        if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+            mChatService.start();
+        }
+    }
+
+    private void stopChatService() {
+        if (mChatService != null) {
+            mChatService.stop();
+        }
     }
 
     BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -78,6 +89,7 @@ public class BluetoothService extends Service {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:// 连接蓝牙
                             Log.i("bluth", "STATE_CONNECTED");
+                            isBreak = false;
                             break;
                         case BluetoothChatService.STATE_CONNECTING:// 正在连接
                             Log.i("bluth", "STATE_CONNECTING");
@@ -115,6 +127,11 @@ public class BluetoothService extends Service {
                     break;
                 case BluetoothConfig.MESSAGE_TOAST:// 蓝牙断开要重新连接
                     Log.i("bluth", "蓝牙断开要重新连接===" + msg.getData().getString(BluetoothConfig.TOAST));
+                    if (!isBreak) {
+                        isBreak = true;
+                        stopChatService();
+                        startChatService();
+                    }
                     connectBluth();
                     break;
             }
@@ -154,10 +171,8 @@ public class BluetoothService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mChatService != null) {
-            mChatService.stop();
-        }
         unregisterReceiver(receiver);
+        stopChatService();
     }
 
 }
