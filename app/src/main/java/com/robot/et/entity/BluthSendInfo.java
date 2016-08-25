@@ -5,29 +5,29 @@ package com.robot.et.entity;
  * 蓝牙发送数据key值
  */
 public class BluthSendInfo {
-    private String CG;//category
-    private String AT;//action
+    private String cG;//category
+    private String aT;//action
     private String DIS;//DigitalServoDriver
-    private String AG;//angle
+    private String aG;//angle
     private String VT;//Vertical
     private String HZ;//Horizontal
     private String DP;//display
     private String side;
 
-    public String getCG() {
-        return CG;
+    public String getcG() {
+        return cG;
     }
 
-    public void setCG(String CG) {
-        this.CG = CG;
+    public void setcG(String cG) {
+        this.cG = cG;
     }
 
-    public String getAT() {
-        return AT;
+    public String getaT() {
+        return aT;
     }
 
-    public void setAT(String AT) {
-        this.AT = AT;
+    public void setaT(String aT) {
+        this.aT = aT;
     }
 
     public String getDIS() {
@@ -38,12 +38,12 @@ public class BluthSendInfo {
         this.DIS = DIS;
     }
 
-    public String getAG() {
-        return AG;
+    public String getaG() {
+        return aG;
     }
 
-    public void setAG(String AG) {
-        this.AG = AG;
+    public void setaG(String aG) {
+        this.aG = aG;
     }
 
     public String getVT() {

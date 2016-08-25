@@ -67,7 +67,7 @@
         <activity
             android:name=".core.software.bluetooth.DeviceListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Dialog"/>
 
         <service android:name=".core.software.voice.iflytek.IflySpeakService" />

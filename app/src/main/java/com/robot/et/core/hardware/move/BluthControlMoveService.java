@@ -154,23 +154,23 @@ public class BluthControlMoveService extends Service {
     //控制摆臂
     private void handAction(String handDirection, String handCategory) {
         BluthSendInfo info = new BluthSendInfo();
-        info.setCG("Hand");
+        info.setcG("Hand");
         if (TextUtils.equals(handDirection, ScriptConfig.HAND_UP)) {
-            info.setSide("up");
+            info.setaT("up");
         } else if (TextUtils.equals(handDirection, ScriptConfig.HAND_DOWN)) {
-            info.setSide("down");
+            info.setaT("down");
         } else if (TextUtils.equals(handDirection, ScriptConfig.HAND_WAVING)) {
-            info.setSide("waving");
+            info.setaT("waving");
         } else if (TextUtils.equals(handDirection, ScriptConfig.HAND_STOP)) {
-            info.setSide("stop");
+            info.setaT("stop");
         }
 
         if (TextUtils.equals(handCategory, ScriptConfig.HAND_LEFT)) {
-            info.setAT("L");
+            info.setSide("L");
         } else if (TextUtils.equals(handCategory, ScriptConfig.HAND_RIGHT)) {
-            info.setAT("R");
+            info.setSide("R");
         } else if (TextUtils.equals(handCategory, ScriptConfig.HAND_TWO)) {
-            info.setAT("LR");
+            info.setSide("LR");
         }
         String json = JSON.toJSONString(info);
         sendMoveAction(json);
@@ -179,13 +179,13 @@ public class BluthControlMoveService extends Service {
     //控制嘴的LED
     private void controlMouthLED(String LEDState) {
         BluthSendInfo info = new BluthSendInfo();
-        info.setCG("DP");
+        info.setcG("DP");
         if (TextUtils.equals(LEDState, ScriptConfig.LED_ON)) {
-            info.setAT("ON");
+            info.setaT("ON");
         } else if (TextUtils.equals(LEDState, ScriptConfig.LED_OFF)) {
-            info.setAT("OFF");
+            info.setaT("OFF");
         } else if (TextUtils.equals(LEDState, ScriptConfig.LED_BLINK)) {
-            info.setAT("blink");
+            info.setaT("blink");
         }
         String json = JSON.toJSONString(info);
         sendMoveAction(json);
@@ -194,13 +194,13 @@ public class BluthControlMoveService extends Service {
     //控制头转向
     private void controlHeadTurn(int directionValue, String angleValue) {
         BluthSendInfo info = new BluthSendInfo();
-        info.setCG("DIS");
+        info.setcG("DIS");
         if (directionValue == DataConfig.TURN_HEAD_ABOUT) {
-            info.setAT("HZ");
+            info.setaT("HZ");
         } else if (directionValue == DataConfig.TURN_HEAD_UP_DOWN) {
-            info.setAT("VT");
+            info.setaT("VT");
         }
-        info.setAG(angleValue);
+        info.setaG(angleValue);
         String json = JSON.toJSONString(info);
         sendMoveAction(json);
     }
