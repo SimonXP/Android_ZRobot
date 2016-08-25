@@ -1,8 +1,5 @@
 package com.robot.et.main;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,11 +8,8 @@ import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -32,8 +26,7 @@ import com.robot.et.R;
 import com.robot.et.common.BroadcastAction;
 import com.robot.et.core.hardware.move.BluthControlMoveService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
-import com.robot.et.core.software.bluetooth.BluetoothChatService;
-import com.robot.et.core.software.bluetooth.BluetoothConfig;
+import com.robot.et.core.software.bluetooth.BluetoothService;
 import com.robot.et.core.software.common.receiver.MsgReceiverService;
 import com.robot.et.core.software.common.view.CustomTextView;
 import com.robot.et.core.software.common.view.EmotionManager;
@@ -85,11 +78,9 @@ public class MainActivity extends RosActivity {
     private boolean validatedConcert;
     private Client client;
     private NodeConfiguration nodeConfiguration;
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothChatService mChatService;
 
-    public MainActivity(){
-        super("XRobot","Xrobot",URI.create("http://192.168.2.105:11311"));//本体的ROS IP和端口
+    public MainActivity() {
+        super("XRobot", "Xrobot", URI.create("http://192.168.2.105:11311"));//本体的ROS IP和端口
 //        availableAppsCache = new ArrayList<Interaction>();
 //        statusPublisher = StatusPublisher.getInstance();
 //        pairSubscriber= PairSubscriber.getInstance();
@@ -112,20 +103,17 @@ public class MainActivity extends RosActivity {
 
         initService();
 
-        initBluth();
-
-        IntentFilter filter=new IntentFilter();
+        IntentFilter filter = new IntentFilter();
         filter.addAction("com.robot.et.rocon");
         filter.addAction(BroadcastAction.ACTION_CONTROL_ROBOT_MOVE_WITH_VOICE);
         filter.addAction(BroadcastAction.ACTION_ROS_SERVICE);
-        filter.addAction(BroadcastAction.ACTION_MOVE_TO_BLUTH);
         registerReceiver(receiver, filter);
 //        prepareAppManager();
     }
 
     @Override
     public void startMasterChooser() {
-        Log.e(TAG,"开始执行MasterChooserService");
+        Log.e(TAG, "开始执行MasterChooserService");
 //        startService(new Intent(this, MasterChooserService.class));
     }
 
@@ -156,7 +144,7 @@ public class MainActivity extends RosActivity {
     }
 
     void init2(RoconDescription roconDescription) {
-        Log.e(TAG,"init2");
+        Log.e(TAG, "init2");
         URI uri;
         try {
             validatedConcert = false;
@@ -192,7 +180,7 @@ public class MainActivity extends RosActivity {
         }
     }
 
-    private void prepareAppManager(){
+    private void prepareAppManager() {
         // Prepare the app manager; we do here instead of on init to keep using the same instance when switching roles
         interactionsManager = new InteractionsManager(
                 new InteractionsManager.FailureHandler() {
@@ -209,8 +197,8 @@ public class MainActivity extends RosActivity {
                     availableAppsCache = (ArrayList<Interaction>) apps;
 
                     Log.e(TAG, "Interaction Publication: " + availableAppsCache.size() + " apps");
-                    for (int i=0;i<availableAppsCache.size();i++){
-                        Log.e(TAG,"DisplayName"+availableAppsCache.get(i).getDisplayName());
+                    for (int i = 0; i < availableAppsCache.size(); i++) {
+                        Log.e(TAG, "DisplayName" + availableAppsCache.get(i).getDisplayName());
                     }
                 } else {
                     // TODO: maybe I should notify the user... he will think something is wrong!
@@ -230,13 +218,13 @@ public class MainActivity extends RosActivity {
                 final boolean allowed = response.getResult();
                 final String reason = response.getMessage();
                 boolean ret_launcher_dialog = false;
-                if(AppLauncher.checkAppType(selectedInteraction.getName()) == AppLauncher.AppType.NOTHING){
+                if (AppLauncher.checkAppType(selectedInteraction.getName()) == AppLauncher.AppType.NOTHING) {
                     pairSubscriber.setAppHash(selectedInteraction.getHash());
                     ret_launcher_dialog = true;
-                } else{
-                    if(allowed){
+                } else {
+                    if (allowed) {
                         pairSubscriber.setAppHash(selectedInteraction.getHash());
-                    } else{
+                    } else {
                         pairSubscriber.setAppHash(0);
                     }
                 }
@@ -247,27 +235,30 @@ public class MainActivity extends RosActivity {
                         public void run() {
                             AppLauncher.Result result = AppLauncher.launch(MainActivity.this, roconDescription, selectedInteraction);
                             if (result == AppLauncher.Result.SUCCESS) {
-                                Log.e(TAG,"Android app launch success");
+                                Log.e(TAG, "Android app launch success");
                                 // App successfully launched! Notify the concert and finish this activity
                                 //statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
                                 // TODO try to no finish so statusPublisher remains while on app;  risky, but seems to work!    finish();
-                            } else if (result == AppLauncher.Result.NOTHING){
+                            } else if (result == AppLauncher.Result.NOTHING) {
                                 //statusPublisher.update(false, selectedInteraction.getHash(), selectedInteraction.getName());
                             } else if (result == AppLauncher.Result.NOT_INSTALLED) {
                                 // App not installed; ask for going to play store to download the missing app
-                                Log.e(TAG,"Android app not installed.");
+                                Log.e(TAG, "Android app not installed.");
                                 statusPublisher.update(false, 0, null);
                                 selectedInteraction = null;
                             } else {
-                                Log.e(TAG,"Cannot start app");
+                                Log.e(TAG, "Cannot start app");
                             }
-                        };
+                        }
+
+                        ;
                     });
                 } else {
-                    Log.i(TAG,"User select cancel");
+                    Log.i(TAG, "User select cancel");
                     statusPublisher.update(false, 0, null);
                 }
             }
+
             @Override
             public void onFailure(RemoteException e) {
                 Log.e(TAG, "Retrieve rapps for role " + roconDescription.getCurrentRole() + " failed: " + e.getMessage());
@@ -282,8 +273,8 @@ public class MainActivity extends RosActivity {
                 new ConcertChecker.ConcertDescriptionReceiver() {
                     public void receive(RoconDescription concertDescription) {
                         // Check that it's not busy
-                        if ( concertDescription.getConnectionStatus() == RoconDescription.UNAVAILABLE ) {
-                            Log.e(TAG,"Concert is unavailable : busy serving another remote controller.");
+                        if (concertDescription.getConnectionStatus() == RoconDescription.UNAVAILABLE) {
+                            Log.e(TAG, "Concert is unavailable : busy serving another remote controller.");
                             startMasterChooser();
                         } else {
                             validatedConcert = true;   // for us this is enough check!
@@ -293,7 +284,7 @@ public class MainActivity extends RosActivity {
             public void handleFailure(String reason) {
                 final String reason2 = reason;
                 // Kill the connecting to ros master dialog.
-                Log.e(TAG,"Cannot contact ROS master: " + reason2);
+                Log.e(TAG, "Cannot contact ROS master: " + reason2);
                 // TODO : gracefully abort back to the concert master chooser instead.
                 finish();
             }
@@ -303,21 +294,21 @@ public class MainActivity extends RosActivity {
         final WifiChecker wc = new WifiChecker(
                 new WifiChecker.SuccessHandler() {
                     public void handleSuccess() {
-                        Log.e(TAG,"Starting connection process");
+                        Log.e(TAG, "Starting connection process");
                         cc.beginChecking(id);
                     }
                 }, new WifiChecker.FailureHandler() {
             public void handleFailure(String reason) {
                 final String reason2 = reason;
-                Log.e(TAG,"Cannot connect to concert WiFi: " + reason2);
+                Log.e(TAG, "Cannot connect to concert WiFi: " + reason2);
                 finish();
             }
         }, new WifiChecker.ReconnectionHandler() {
             public boolean doReconnection(String from, String to) {
                 if (from == null) {
-                    Log.e(TAG,"To interact with this master, you must connect to " + to + "\nDo you want to connect to " + to + "?");
+                    Log.e(TAG, "To interact with this master, you must connect to " + to + "\nDo you want to connect to " + to + "?");
                 } else {
-                    Log.e(TAG,"To interact with this master, you must switch wifi networks" + "\nDo you want to switch from " + from + " to " + to + "?");
+                    Log.e(TAG, "To interact with this master, you must switch wifi networks" + "\nDo you want to switch from " + from + " to " + to + "?");
                 }
                 return true;
             }
@@ -368,13 +359,15 @@ public class MainActivity extends RosActivity {
 //        startService(new Intent(this, SerialPortService.class));
         //控制动
         startService(new Intent(this, BluthControlMoveService.class));
+        //蓝牙
+        startService(new Intent(this, BluetoothService.class));
         //agora
         startService(new Intent(this, AgoraService.class));
     }
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        Log.e(TAG,"init(NodeMainExecutor nodeMainExecutor)");
+        Log.e(TAG, "init(NodeMainExecutor nodeMainExecutor)");
         try {
             java.net.Socket socket = new java.net.Socket(getMasterUri().getHost(), getMasterUri().getPort());
             java.net.InetAddress local_network_address = socket.getLocalAddress();
@@ -402,61 +395,54 @@ public class MainActivity extends RosActivity {
         }
     }
 
-    BroadcastReceiver receiver=new BroadcastReceiver() {
+    BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("com.robot.et.rocon")){
-                Log.e(TAG,"接收到数据");
-                roconDescription=(RoconDescription)intent.getSerializableExtra("RoconDescription");
+            if (intent.getAction().equals("com.robot.et.rocon")) {
+                Log.e(TAG, "接收到数据");
+                roconDescription = (RoconDescription) intent.getSerializableExtra("RoconDescription");
                 init2(roconDescription);
-            } else if (intent.getAction().equals(BroadcastAction.ACTION_ROS_SERVICE)){
-                Log.e(TAG,"接收到ROS数据");
-                String flag=intent.getStringExtra("rosKey");
-                if (TextUtils.equals("Roaming",flag)){
+            } else if (intent.getAction().equals(BroadcastAction.ACTION_ROS_SERVICE)) {
+                Log.e(TAG, "接收到ROS数据");
+                String flag = intent.getStringExtra("rosKey");
+                if (TextUtils.equals("Roaming", flag)) {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            doMoveAction(availableAppsCache,roconDescription.getCurrentRole(),"Roaming");
+                            doMoveAction(availableAppsCache, roconDescription.getCurrentRole(), "Roaming");
                             return null;
                         }
                     }.execute();
-                }else if (TextUtils.equals("Stop",flag)){
+                } else if (TextUtils.equals("Stop", flag)) {
                     doStopAction();
-                }else if (TextUtils.equals("AddTWO",flag)){
+                } else if (TextUtils.equals("AddTWO", flag)) {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            nodeMainExecutorService.execute(client,nodeConfiguration.setNodeName("Client"));
+                            nodeMainExecutorService.execute(client, nodeConfiguration.setNodeName("Client"));
                             return null;
                         }
                     }.execute();
-                }
-            } else if (intent.getAction().equals(BroadcastAction.ACTION_MOVE_TO_BLUTH)) {//发送蓝牙数据
-                Log.i("bluth", "发送蓝牙数据");
-                byte[] content = intent.getByteArrayExtra("actioncontent");
-                if (content != null && content.length > 0) {
-                    if (mChatService != null) {
-                        mChatService.write(content);
-                    }
                 }
             }
         }
     };
 
-    protected void doMoveAction(final ArrayList<Interaction> apps, final String role,final String displayName){
+    protected void doMoveAction(final ArrayList<Interaction> apps, final String role, final String displayName) {
         selectedInteraction = null;
-        for (int i=0;i<apps.size();i++){
-            Log.e(TAG, "InteractionDisplayName:"+apps.get(i).getDisplayName());
+        for (int i = 0; i < apps.size(); i++) {
+            Log.e(TAG, "InteractionDisplayName:" + apps.get(i).getDisplayName());
             if (apps.get(i).getDisplayName().equals(displayName)) {
-                Log.e(TAG, "Start"+displayName);
+                Log.e(TAG, "Start" + displayName);
                 selectedInteraction = apps.get(i);
                 interactionsManager.requestAppUse(roconDescription.getMasterId(), role, selectedInteraction);
                 statusPublisher.update(true, selectedInteraction.getHash(), selectedInteraction.getName());
-                Log.e(TAG, "Start2"+displayName);
+                Log.e(TAG, "Start2" + displayName);
             }
         }
     }
-    protected void doStopAction(){
+
+    protected void doStopAction() {
         pairSubscriber.setAppHash(0);
         statusPublisher.update(false, 0, null);
     }
@@ -472,9 +458,6 @@ public class MainActivity extends RosActivity {
         super.onDestroy();
         unregisterReceiver(receiver);
         destoryService();
-        if (mChatService != null) {
-            mChatService.stop();
-        }
     }
 
     private void destoryService() {
@@ -488,163 +471,10 @@ public class MainActivity extends RosActivity {
 //        stopService(new Intent(this, NettyService.class));
 //        stopService(new Intent(this, ControlMoveService.class));
 //        stopService(new Intent(this, SerialPortService.class));
-
+        stopService(new Intent(this, BluetoothService.class));
         stopService(new Intent(this, BluthControlMoveService.class));
         stopService(new Intent(this, AgoraService.class));
         stopService(new Intent(this, MasterChooserService.class));
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mBluetoothAdapter != null) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableIntent, BluetoothConfig.REQUEST_ENABLE_BT);
-            } else {
-                if (mChatService == null) {
-                    initBluthChat();
-                }
-            }
-        }
-    }
-
-    @Override
-    protected synchronized void onResume() {
-        super.onResume();
-        if (mChatService != null) {
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-                mChatService.start();
-            }
-            connectBluth();
-        }
-    }
-
-    private void initBluth() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        findViewById(R.id.main).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                connectBluth();
-            }
-        });
-    }
-
-    private void initBluthChat() {
-        mChatService = new BluetoothChatService(this, mHandler);
-    }
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case BluetoothConfig.MESSAGE_STATE_CHANGE://吐司
-                    Log.i("bluth", "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                    switch (msg.arg1) {
-                        case BluetoothChatService.STATE_CONNECTED://连接蓝牙
-                            Log.i("bluth", "STATE_CONNECTED");
-                            break;
-                        case BluetoothChatService.STATE_CONNECTING://正在连接
-                            Log.i("bluth", "STATE_CONNECTING");
-                            break;
-                        case BluetoothChatService.STATE_LISTEN://蓝牙列表
-                        case BluetoothChatService.STATE_NONE://没有蓝牙数据
-                            Log.i("bluth", "STATE_NONE");
-                            break;
-                    }
-                    break;
-                case BluetoothConfig.MESSAGE_WRITE://写数据
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    Log.i("bluth", "MESSAGE_WRITE writeMessage===" + writeMessage);
-                    break;
-                case BluetoothConfig.MESSAGE_READ://读数据
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.i("bluth", "MESSAGE_READ readMessage===" + readMessage);
-                    buffer.append(readMessage);
-                    String data = handString(buffer.toString());
-                    Log.i("bluth", "MESSAGE_READ data===" + data);
-
-
-                    break;
-                case BluetoothConfig.MESSAGE_DEVICE_NAME://设备的名字
-                    // save the connected device's name
-                    String mConnectedDeviceName = msg.getData().getString(BluetoothConfig.DEVICE_NAME);
-                    Log.i("bluth", "MESSAGE_DEVICE_NAME mConnectedDeviceName===" + mConnectedDeviceName);
-                    break;
-                case BluetoothConfig.MESSAGE_TOAST://通知蓝牙连接断开
-                    Log.i("bluth", "MESSAGE_TOAST===" + msg.getData().getString(BluetoothConfig.TOAST));
-                    connectBluth();
-
-                    break;
-            }
-        }
-    };
-
-    private static StringBuffer buffer = new StringBuffer(1024);
-
-    //处理传送来的数据
-    private String handString(String str) {
-        String begin = "{";
-        String end = "}";
-        String result = "";
-        if (!TextUtils.isEmpty(str)) {
-            if (str.contains(begin) && str.contains(end)) {
-                int start = str.indexOf(begin);
-                int stop = str.lastIndexOf(end);
-                if (stop > start) {
-                    result = str.substring(start, stop + 1);
-                    if (!TextUtils.isEmpty(str)) {
-                        buffer.delete(start, stop + 1);
-                        if (start != 0) {
-                            buffer.delete(0, start);
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private void connectBluth() {
-//        Intent intent = new Intent(this, DeviceListActivity.class);
-//        startActivityForResult(intent, BluetoothConfig.REQUEST_CONNECT_DEVICE_SECURE);
-        String address = "20:16:06:20:65:84";
-        boolean secure = true;
-        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-        mChatService.connect(device, secure);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK) {
-            return;
-        }
-        switch(requestCode) {
-            case BluetoothConfig.REQUEST_ENABLE_BT://打开蓝牙权限
-                initBluthChat();
-                break;
-            case BluetoothConfig.REQUEST_CONNECT_DEVICE_SECURE://连接设备
-                connectDevice(data, true);
-                break;
-            default:
-                break;
-        }
-    }
-
-    //连接设备
-    private void connectDevice(Intent data, boolean secure) {
-        // Get the device MAC address
-        String address = data.getExtras().getString(BluetoothConfig.EXTRA_DEVICE_ADDRESS);
-        Log.i("bluth", "address===" + address);
-        // Get the BluetoothDevice object
-        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-        // Attempt to connect to the device
-        mChatService.connect(device, secure);
     }
 
 }

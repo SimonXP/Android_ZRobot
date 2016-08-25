@@ -82,6 +82,7 @@
         <service android:name=".core.hardware.move.BluthControlMoveService"/>
         <service android:name=".core.software.video.agora.AgoraService"/>
         <service android:name=".core.hardware.serialport.SerialPortService"/>
+        <service android:name=".core.software.bluetooth.BluetoothService"/>
 
         <receiver android:name=".core.software.common.receiver.AlarmRemindReceiver" />
 
