@@ -30,13 +30,11 @@ import com.github.rosjava.android_remocons.common_tools.system.WifiChecker;
 import com.google.common.base.Preconditions;
 import com.robot.et.R;
 import com.robot.et.common.BroadcastAction;
-import com.robot.et.core.hardware.move.ControlMoveService;
-import com.robot.et.core.hardware.serialport.SerialPortService;
+import com.robot.et.core.hardware.move.BluthControlMoveService;
 import com.robot.et.core.hardware.wakeup.WakeUpServices;
 import com.robot.et.core.software.bluetooth.BluetoothChatService;
 import com.robot.et.core.software.bluetooth.BluetoothConfig;
 import com.robot.et.core.software.bluetooth.DeviceListActivity;
-import com.robot.et.core.software.common.push.netty.NettyService;
 import com.robot.et.core.software.common.receiver.MsgReceiverService;
 import com.robot.et.core.software.common.view.CustomTextView;
 import com.robot.et.core.software.common.view.EmotionManager;
@@ -350,7 +348,7 @@ public class MainActivity extends RosActivity {
 
     private void initService() {
         //netty
-        startService(new Intent(this, NettyService.class));
+//        startService(new Intent(this, NettyService.class));
         //语音听写
         startService(new Intent(this, IflyVoiceToTextService.class));
         //文本理解
@@ -366,11 +364,11 @@ public class MainActivity extends RosActivity {
         //语音合成
         startService(new Intent(this, IflySpeakService.class));
         //控制动
-        startService(new Intent(this, ControlMoveService.class));
+//        startService(new Intent(this, ControlMoveService.class));
         //串口
-        startService(new Intent(this, SerialPortService.class));
+//        startService(new Intent(this, SerialPortService.class));
         //控制动
-//        startService(new Intent(this, BluthControlMoveService.class));
+        startService(new Intent(this, BluthControlMoveService.class));
         //agora
         startService(new Intent(this, AgoraService.class));
     }
@@ -488,12 +486,12 @@ public class MainActivity extends RosActivity {
         stopService(new Intent(this, MusicPlayerService.class));
         stopService(new Intent(this, WakeUpServices.class));
         stopService(new Intent(this, MsgReceiverService.class));
-        stopService(new Intent(this, NettyService.class));
-        stopService(new Intent(this, ControlMoveService.class));
-//        stopService(new Intent(this, BluthControlMoveService.class));
-        stopService(new Intent(this, AgoraService.class));
-        stopService(new Intent(this, SerialPortService.class));
+//        stopService(new Intent(this, NettyService.class));
+//        stopService(new Intent(this, ControlMoveService.class));
+//        stopService(new Intent(this, SerialPortService.class));
 
+        stopService(new Intent(this, BluthControlMoveService.class));
+        stopService(new Intent(this, AgoraService.class));
         stopService(new Intent(this, MasterChooserService.class));
     }
 
