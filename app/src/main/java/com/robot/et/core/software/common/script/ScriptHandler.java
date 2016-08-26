@@ -1,6 +1,7 @@
 package com.robot.et.core.software.common.script;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,8 +53,8 @@ public class ScriptHandler implements Script {
                     Log.i("netty", "doScriptAction() 表情");
                     int emotionKey = EnumManager.getEmotionKey(content);
                     Log.i("netty", "doScriptAction() emotionKey====" + emotionKey);
+                    ScriptManager.setScriptActionInfos(infos);
                     BroadcastEnclosure.controlRobotEmotion(context, emotionKey);
-                    handleNewScriptInfos(context, infos, true, getDealyTime(2000));
 
                     break;
                 case ScriptConfig.SCRIPT_MUSIC://音乐
@@ -155,6 +156,13 @@ public class ScriptHandler implements Script {
                     handleNewScriptInfos(context, infos, true, getDealyTime(2000));
 
                     break;
+                case ScriptConfig.SCRIPT_HEAD://头
+                    Log.i("netty", "doScriptAction() 头");
+                    String angle = info.getSpareContent();
+                    turnHead(context, content, angle);
+                    handleNewScriptInfos(context, infos, true, getDealyTime(2000));
+
+                    break;
                 default:
                     break;
             }
@@ -163,6 +171,64 @@ public class ScriptHandler implements Script {
             Log.i("netty", "doScriptAction()剧本执行完毕");
             playScriptEnd(context);
         }
+    }
+
+    //头部转向
+    //上下以垂直方向为0度，向前10度即-10，向后10度即+10  左右横向运动以正中为0度，向右10度即-10，向左10度即+10
+    private static void turnHead(final Context context, String content, String angle) {
+        String turnAngle = "";
+        int headDirection = DataConfig.TURN_HEAD_ABOUT;
+        boolean isSingle = true;
+        if (TextUtils.equals(content, "抬头")) {
+            Log.i("netty", "doScriptAction() 抬头");
+            headDirection = DataConfig.TURN_HEAD_UP_DOWN;
+            turnAngle = "5";
+            isSingle = true;
+        } else if (TextUtils.equals(content, "点头")) {
+            Log.i("netty", "doScriptAction() 点头");
+            headDirection = DataConfig.TURN_HEAD_UP_DOWN;
+            turnAngle = "-5";
+            isSingle = false;
+        } else if (TextUtils.equals(content, "左转")) {
+            Log.i("netty", "doScriptAction() 头左转");
+            headDirection = DataConfig.TURN_HEAD_ABOUT;
+            turnAngle = getTurnAngle(true, angle);
+            isSingle = true;
+        } else if (TextUtils.equals(content, "右转")) {
+            Log.i("netty", "doScriptAction() 头右转");
+            headDirection = DataConfig.TURN_HEAD_ABOUT;
+            turnAngle = getTurnAngle(false, angle);
+            isSingle = true;
+        }
+        Log.i("netty", "doScriptAction() 头turnAngle====" + turnAngle);
+        BroadcastEnclosure.controlHead(context, headDirection, turnAngle);
+        if (!isSingle) {//点头
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    BroadcastEnclosure.controlHead(context, DataConfig.TURN_HEAD_UP_DOWN, "5");
+                }
+            }, 1500);
+        }
+    }
+
+    //获取头部左转右转角度
+    private static String getTurnAngle(boolean isLeft, String angleContent) {
+        String angle = "";
+        if (!TextUtils.isEmpty(angleContent)) {
+            if (isLeft) {
+                angle = angleContent;
+            } else {
+                angle = "-" + angleContent;
+            }
+        } else {
+            if (isLeft) {
+                angle = "5";
+            } else {
+                angle = "-5";
+            }
+        }
+        return angle;
     }
 
     //更新剧本的内容

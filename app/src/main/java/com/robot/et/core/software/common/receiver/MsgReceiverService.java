@@ -130,6 +130,9 @@ public class MsgReceiverService extends Service {
                     ViewCommon.initView();
                     EmotionManager.showEmotionAnim(emotionKey);
                 }
+                if (DataConfig.isPlayScript) {
+                    new ScriptHandler().scriptAction(MsgReceiverService.this);
+                }
             }
         }
     };

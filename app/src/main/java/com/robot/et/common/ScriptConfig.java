@@ -23,6 +23,8 @@ public class ScriptConfig {
     public static final int SCRIPT_TURN = 90009;
     //停止
     public static final int SCRIPT_STOP = 90010;
+    //头
+    public static final int SCRIPT_HEAD = 90011;
 
 
     //顺时针
