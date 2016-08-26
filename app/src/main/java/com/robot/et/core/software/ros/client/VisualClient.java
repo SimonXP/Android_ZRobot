@@ -63,71 +63,91 @@ public class VisualClient extends AbstractNodeMain {
         serviceClient.call(request, new ServiceResponseListener<VisualResponse>() {
             @Override
             public void onSuccess(VisualResponse response) {
-                Log.e("ROS_Client", "onSuccess:Result:" + response.getResult() + ",Name:" + response.getName());
+                Log.e("ROS_Client", "onSuccess:Result:" + response.getResult1() + ",Name:" + response.getName());
                 if (flag == 1) {
                     //打开视觉
-                    if (response.getResult() == 0) {
+                    if (response.getResult1() == 0) {
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "视觉已启动");
                     } else {
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "视觉启动失败");
                     }
                 } else if (flag == 2) {
                     //视觉学习
-                    if (response.getResult()== -1){
+                    if (response.getResult1()== -1){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "视觉学习未开启");
-                    }else if (response.getResult()== 0){
+                    }else if (response.getResult1()== 0){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "好的，记住了");
-                    }else if (response.getResult()==1){
+                    }else if (response.getResult1()==1){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "距离太近了");
-                    }else if (response.getResult()==2){
+                    }else if (response.getResult1()==2){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "距离太远了");
-                    }else if (response.getResult()==10){
+                    }else if (response.getResult1()==10){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太低了");
-                    }else if (response.getResult()==11){
+                    }else if (response.getResult1()==11){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太高了");
-                    }else if (response.getResult()==12){
+                    }else if (response.getResult1()==12){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太靠左了");
-                    }else if (response.getResult()==13){
+                    }else if (response.getResult1()==13){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太靠右了");
-                    }else if (response.getResult()==20){
+                    }else if (response.getResult1()==20){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "没看见有东西");
-                    }else if (response.getResult()==21){
+                    }else if (response.getResult1()==21){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "东西太小了，看不清");
                     }
                 } else if (flag == 3) {
                     //视觉识别
-                    if (response.getResult()== -1){
+                    if (response.getResult1()== -1){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "视觉学习未开启");
-                    }else if (response.getResult()==0){
-                        String result=response.getName();
-                        if (TextUtils.equals("",result)){
+                    }else if (response.getResult1()==0){
+                        if (response.getResult2()==0){
                             SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "我不认识这个东西，让我学习一下吧！");
-                        }else {
-                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这是一个："+response.getName());
+                        }else if (response.getResult2()== 1){
+                            //可能（40%以上）
+                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这可能是："+response.getName());
+                        }else if (response.getResult2()== 2){
+                            //是（80%以上）
+                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这是："+response.getName());
+                        }else if (response.getResult2()== 3){
+                            //一定（95%以上）
+                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这一定是："+response.getName());
+                        }else if (response.getResult2()== 10){
+                            String[] temp=response.getName().split("|");
+                            if (temp.length==2){
+                                SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这个不是："+temp[0]+"就是："+temp[1]);
+                            }else {
+                                SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "出现异常");
+                            }
                         }
-                    }else if (response.getResult()==1){
+                    }else if (response.getResult1()==1){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "距离太近了");
-                    }else if (response.getResult()==2){
+                    }else if (response.getResult1()==2){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "距离太远了");
-                    }else if (response.getResult()==10){
+                    }else if (response.getResult1()==10){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太低了");
-                    }else if (response.getResult()==11){
+                    }else if (response.getResult1()==11){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太高了");
-                    }else if (response.getResult()==12){
+                    }else if (response.getResult1()==12){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太靠左了");
-                    }else if (response.getResult()==13){
+                    }else if (response.getResult1()==13){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "物体太靠右了");
-                    }else if (response.getResult()==20){
+                    }else if (response.getResult1()==20){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "没看见有东西");
-                    }else if (response.getResult()==21){
+                    }else if (response.getResult1()==21){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "东西太小了，看不清");
                     }
                 }else if (flag == 4){
                     //视觉识别
-                    if (response.getResult()==0){
+                    if (response.getResult1()==0){
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉识别模块");
                     }else {
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉识别模块失败");
+                    }
+                }else if (flag == 5){
+                    //删除所有视觉学习内容
+                    if (response.getResult1()==0){
+                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "已删除所学内容");
+                    }else {
+                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "删除学习内容失败");
                     }
                 }
             }

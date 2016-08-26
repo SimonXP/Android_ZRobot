@@ -7,5 +7,5 @@ import org.ros.internal.message.Message;
  */
 public interface Visual extends Message {
     String _TYPE = "com.robot.et.core.software.ros.visual/Visual";
-    String _DEFINITION = "int64 id\nstring name\n---\nint64 result\nstring name\n";
+    String _DEFINITION = "int64 id\nstring name\n---\nint64 result1\nint64 result2\nstring name\n";
 }

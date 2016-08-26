@@ -41,7 +41,7 @@ public enum RosServiceEnum {
 	* @mark Learn is not here（CommandHandler Method：isRosService，line number：397）
 	* Created by Tony
 	*/
-	DEEPLEARN("Deep Learning","视觉学习服务"),//匹配Rapp中的Deep Learning
+	DEEPLEARN("Deep Learning","视觉服务"),//匹配Rapp中的Deep Learning
 
 	DEEPLEARNINIT("DeepLearnInit","启动视觉学习"),
 //	VISUALLEARNSERVICE("VisualLearn","视觉学习"),
@@ -51,6 +51,8 @@ public enum RosServiceEnum {
 	DEEPLEARNREC3("DeepLearnRec","看看这是啥"),
 
 	DEEPLEARNCLOSE("DeepLearnClose","关闭视觉学习"),
+
+	DELETEALLVISUAL("DeleteAllVisual","忘记学习内容"),
 
 	/*
      * ******服务
