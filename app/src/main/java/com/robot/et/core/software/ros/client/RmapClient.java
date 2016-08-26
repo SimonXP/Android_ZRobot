@@ -53,6 +53,7 @@ public class RmapClient extends AbstractNodeMain {
             @Override
             public void onFailure(RemoteException e) {
                 Log.e("ROS_Client","onFailure");
+                SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "保存地图失败");
                 throw new RosRuntimeException(e);
             }
         });

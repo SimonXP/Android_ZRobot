@@ -399,7 +399,19 @@ public class CommandHandler {
         if (!TextUtils.isEmpty(result)) {
             SpeechImpl.getInstance().startListen();
             EmotionManager.showEmotion(R.mipmap.emotion_normal);
-            if (result.contains("记住这个是")||result.contains("记住这是")) {
+            if (result.contains("导航到")){
+                //获取目的地
+                int start = result.indexOf("到");
+                content = result.substring(start + 1, result.length());
+                sendRos("DestinationName",content);
+                return true;
+            } else if (result.contains("这个地方是")||result.contains("这里是")){
+                //获取地图上面的位置坐标
+                int start = result.indexOf("是");
+                content = result.substring(start + 1, result.length());
+                sendRos("PositionName",content);
+                return true;
+            } else if (result.contains("记住这个是")||result.contains("记住这是")) {
                 int start = result.indexOf("是");
                 content = result.substring(start + 1, result.length());
                 sendRos("DeepLearn",content);
