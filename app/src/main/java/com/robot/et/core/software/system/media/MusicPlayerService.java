@@ -21,7 +21,7 @@ import com.robot.et.core.software.common.push.netty.NettyClientHandler;
 import com.robot.et.core.software.common.script.ScriptHandler;
 import com.robot.et.core.software.common.view.EmotionManager;
 import com.robot.et.core.software.common.view.SpectrumManager;
-import com.robot.et.core.software.common.view.TextManager;
+import com.robot.et.core.software.common.view.ViewCommon;
 import com.robot.et.util.MusicManager;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class MusicPlayerService extends Service {
                 }
 
                 SpectrumManager.hideSpectrum();
-                SpectrumManager.showSpectrumLinearLayout(false);
+                ViewCommon.initView();
                 EmotionManager.showEmotion(R.mipmap.emotion_normal);
 
                 intent.setAction(BroadcastAction.ACTION_PLAY_MUSIC_END);
@@ -150,8 +150,7 @@ public class MusicPlayerService extends Service {
         public void onPrepared(MediaPlayer mp) {
             Log.i("music", "音乐开始播放");
             DataConfig.isPlayMusic = true;
-            EmotionManager.showEmotionLinearLayout(false);
-            TextManager.showTextLinearLayout(false);
+            ViewCommon.initView();
             SpectrumManager.showSpectrum();
 
             mediaPlayer.start(); // 开始播放

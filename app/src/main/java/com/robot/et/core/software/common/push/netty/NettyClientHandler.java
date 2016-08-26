@@ -54,7 +54,40 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Object> impl
 
                 Log.i("netty", "direction===" + direction);
                 if (TextUtils.isDigitsOnly(direction)) {
-                    BroadcastEnclosure.controlMoveByApp(context, Integer.parseInt(direction));
+                    int moveKey = Integer.parseInt(direction);
+                    if (moveKey < 10) {
+                        Log.i("netty", "控制脚走");
+                        BroadcastEnclosure.controlMoveByApp(context, moveKey);
+                    } else {
+                        int directionTurn = DataConfig.TURN_HEAD_ABOUT;
+                        String angle = "";
+                        //上下以垂直方向为0度，向前10度即-10，向后10度即+10  左右横向运动以正中为0度，向右10度即-10，向左10度即+10
+                        switch (moveKey) {
+                           case 11://头向前
+                               Log.i("netty", "头向前");
+                               directionTurn = DataConfig.TURN_HEAD_UP_DOWN;
+                               angle = "-5";
+                               break;
+                           case 12://头向后
+                               Log.i("netty", "头向后");
+                               directionTurn = DataConfig.TURN_HEAD_UP_DOWN;
+                               angle = "5";
+                               break;
+                           case 13://头向左
+                               Log.i("netty", "头向左");
+                               directionTurn = DataConfig.TURN_HEAD_ABOUT;
+                               angle = "5";
+                               break;
+                           case 14://头向右
+                               Log.i("netty", "头向右");
+                               directionTurn = DataConfig.TURN_HEAD_ABOUT;
+                               angle = "-5";
+                               break;
+                           default:
+                               break;
+                       }
+                        BroadcastEnclosure.controlHead(context, directionTurn, angle);
+                    }
                 } else {
                     String splite = "__";
                     if (direction.contains(splite)) {//1_1(小车编号__方向指令)

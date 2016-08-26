@@ -11,13 +11,14 @@ import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.robot.et.common.BroadcastAction;
-import com.robot.et.util.BroadcastEnclosure;
 import com.robot.et.common.DataConfig;
 import com.robot.et.common.UrlConfig;
 import com.robot.et.core.software.common.network.HttpManager;
 import com.robot.et.core.software.common.network.RobotInfoCallBack;
+import com.robot.et.core.software.common.script.ScriptHandler;
 import com.robot.et.entity.CommandMsg;
 import com.robot.et.entity.RobotInfo;
+import com.robot.et.util.BroadcastEnclosure;
 import com.robot.et.util.DeviceUuidFactory;
 import com.robot.et.util.SharedPreferencesKeys;
 import com.robot.et.util.SharedPreferencesUtils;
@@ -61,6 +62,8 @@ public class NettyService extends Service implements RobotInfoCallBack {
         } else {
             BroadcastEnclosure.connectNetty(this);
         }
+
+        ScriptHandler.addLocalScript(this, "script2");
     }
 
     //连接netty

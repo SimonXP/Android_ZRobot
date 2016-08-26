@@ -18,7 +18,7 @@ import com.robot.et.common.RequestConfig;
 import com.robot.et.core.software.common.script.ScriptHandler;
 import com.robot.et.core.software.common.speech.SpeechImpl;
 import com.robot.et.core.software.common.view.EmotionManager;
-import com.robot.et.core.software.common.view.TextManager;
+import com.robot.et.core.software.common.view.ViewCommon;
 import com.robot.et.core.software.voice.SpeechService;
 import com.robot.et.util.AlarmRemindManager;
 import com.robot.et.util.BroadcastEnclosure;
@@ -206,7 +206,7 @@ public class IflySpeakService extends SpeechService {
     }
 
     private void showNormalEmotion(boolean isShow) {
-        TextManager.showTextLinearLayout(false);
+        ViewCommon.initView();
         if (isShow) {
             EmotionManager.showEmotion(R.mipmap.emotion_normal);
         }

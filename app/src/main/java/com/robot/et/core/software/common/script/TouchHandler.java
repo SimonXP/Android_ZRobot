@@ -1,7 +1,7 @@
 package com.robot.et.core.software.common.script;
 
 import android.content.Context;
-import android.os.SystemClock;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -76,10 +76,14 @@ public class TouchHandler {
     }
 
     //摆手
-    private static void waving(Context context, String handCategory) {
+    private static void waving(final Context context, final String handCategory) {
         BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_UP, handCategory, "0");
-        SystemClock.sleep(2000);
-        BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_DOWN, handCategory, "0");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_DOWN, handCategory, "0");
+            }
+        }, 1500);
         SpeechImpl.getInstance().startListen();
     }
 

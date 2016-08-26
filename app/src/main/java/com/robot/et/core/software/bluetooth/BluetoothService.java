@@ -14,6 +14,14 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.robot.et.common.BroadcastAction;
+import com.robot.et.common.DataConfig;
+import com.robot.et.common.enums.ControlMoveEnum;
+import com.robot.et.entity.BluthReceiverInfo;
+import com.robot.et.util.BroadcastEnclosure;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 /**
  * Created by houdeming on 2016/8/25.
@@ -25,6 +33,7 @@ public class BluetoothService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothChatService mChatService;
     private boolean isBreak;
+    private Intent interruptIntent, turnIntent;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -44,6 +53,9 @@ public class BluetoothService extends Service {
             startChatService();
             connectBluth();
         }
+
+        interruptIntent = new Intent();
+        turnIntent = new Intent();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BroadcastAction.ACTION_MOVE_TO_BLUTH);
@@ -110,13 +122,16 @@ public class BluetoothService extends Service {
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-
                     buffer.append(readMessage);
                     String buf = buffer.toString();
                     Log.i("bluth", "MESSAGE_READ buf.length()===" + buf.length());
                     Log.i("bluth", "MESSAGE_READ buf===" + buf);
 
-                    handString(buf);
+                    String result = getJsonString(buf);
+                    Log.i("bluthresult", "MESSAGE_READ result===" + result);
+                    if (!TextUtils.isEmpty(result)) {
+                        handleJsonResult(result);
+                    }
 
                     break;
                 case BluetoothConfig.MESSAGE_DEVICE_NAME:// 设备的名字
@@ -138,17 +153,17 @@ public class BluetoothService extends Service {
         }
     };
 
-    //处理发送来的字符串，可能丢帧
-    private void handString(String str) {
+    //获取完整的json格式数据，可能丢帧
+    private String getJsonString(String str) {
         String begin = "{";
         String end = "}";
+        String result = "";
         if (!TextUtils.isEmpty(str)) {
             if (str.contains(begin) && str.contains(end)) {
                 int start = str.indexOf(begin);
                 int stop = str.lastIndexOf(end);
                 if (stop > start) {
-                    String result = str.substring(start, stop + 1);
-                    Log.i("bluth", "MESSAGE_READ result===" + result);
+                    result = str.substring(start, stop + 1);
                     if (!TextUtils.isEmpty(str)) {
                         buffer.delete(start, stop + 1);
                         Log.i("bluth", "MESSAGE_READ start===" + start);
@@ -159,6 +174,100 @@ public class BluetoothService extends Service {
                 }
             }
         }
+        return result;
+    }
+
+    //对json数据结果处理
+    private void handleJsonResult(String result) {
+        if (!TextUtils.isEmpty(result)) {
+            BluthReceiverInfo info = getBluthReceiverInfo(result);
+            if (info != null) {
+                //唤醒
+                int xFState = info.getxF();
+                if (xFState == 1) {//有唤醒
+                    int xFAngle = info.getxAg();
+                    Log.i("bluthresult", "xFAngle===" + xFAngle);
+                    //当在人脸检测的时候不发送广播
+                    if (!DataConfig.isFaceRecogniseIng) {
+                        //软件做业务
+                        interruptIntent.setAction(BroadcastAction.ACTION_WAKE_UP_OR_INTERRUPT);
+                        sendBroadcast(interruptIntent);
+
+                        //硬件去转身
+                        turnIntent.setAction(BroadcastAction.ACTION_WAKE_UP_TURN_BY_DEGREE);
+                        turnIntent.putExtra("degree", xFAngle);
+                        sendBroadcast(turnIntent);
+                    }
+                }
+
+                //红外
+                int hW = info.getHw();
+                if (hW == 1) {//有人影进入范围
+                    Log.i("bluthresult", "检测到人影");
+                    BroadcastEnclosure.openFaceRecognise(this, false);
+                }
+
+                //雷达数据
+                int leftValue = info.getRdL();
+                int middleValue = info.getRdM();
+                int rightValue = info.getRdR();
+                Log.i("bluthresult", "leftValue==" + leftValue + "---middleValue===" + middleValue + "---rightValue===" + rightValue);
+                if (DataConfig.isControlRobotMove) {
+                    int stopValue = 20;
+                    if (leftValue < stopValue || middleValue < stopValue || rightValue < stopValue) {
+                        DataConfig.isControlRobotMove = false;
+                        Log.i("bluthresult", "雷达发送停止1");
+                        BroadcastEnclosure.sendRadar(this);
+
+                        //向后退
+                        int moveKey = ControlMoveEnum.BACKWARD.getMoveKey();
+                        Log.i("bluthresult", "发送后退");
+                        BroadcastEnclosure.controlRobotMove(this, moveKey);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.i("bluthresult", "雷达发送停止2");
+                                BroadcastEnclosure.sendRadar(BluetoothService.this);
+                            }
+                        }, 1000);
+                    }
+                }
+
+            }
+        }
+    }
+
+    //{"rdl":0,"rdm":0,"rdr":0,"xf":1,"xag":20,"hw":1}
+    private BluthReceiverInfo getBluthReceiverInfo(String result) {
+        BluthReceiverInfo info = null;
+        if (!TextUtils.isEmpty(result)) {
+            try {
+                JSONTokener tokener = new JSONTokener(result);
+                JSONObject object = new JSONObject(tokener);
+                info = new BluthReceiverInfo();
+                if (object.has("rdl")) {
+                    info.setRdL(object.getInt("rdl"));
+                }
+                if (object.has("rdm")) {
+                    info.setRdM(object.getInt("rdm"));
+                }
+                if (object.has("rdr")) {
+                    info.setRdR(object.getInt("rdr"));
+                }
+                if (object.has("xf")) {
+                    info.setxF(object.getInt("xf"));
+                }
+                if (object.has("xag")) {
+                    info.setxAg(object.getInt("xag"));
+                }
+                if (object.has("hw")) {
+                    info.setHw(object.getInt("hw"));
+                }
+            } catch (JSONException e) {
+                Log.i("bluthresult", "JSONException");
+            }
+        }
+        return info;
     }
 
     //连接蓝牙

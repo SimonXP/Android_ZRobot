@@ -131,4 +131,12 @@ public class BroadcastEnclosure {
         context.sendBroadcast(intent);
     }
 
+    //控制头的广播
+    public static void controlHead(Context context, int direction, String angle) {
+        intent.putExtra("direction", direction);
+        intent.putExtra("angle", angle);
+        intent.setAction(BroadcastAction.ACTION_ROBOT_TURN_HEAD);
+        context.sendBroadcast(intent);
+    }
+
 }

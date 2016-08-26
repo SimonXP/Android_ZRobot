@@ -15,6 +15,7 @@ import com.robot.et.common.DataConfig;
 import com.robot.et.core.software.common.script.ScriptHandler;
 import com.robot.et.core.software.common.speech.SpeechImpl;
 import com.robot.et.core.software.common.view.EmotionManager;
+import com.robot.et.core.software.common.view.ViewCommon;
 import com.robot.et.core.software.face.iflytek.FaceDistinguishActivity;
 import com.robot.et.db.RobotDB;
 import com.robot.et.util.BroadcastEnclosure;
@@ -47,6 +48,7 @@ public class MsgReceiverService extends Service {
         filter.addAction(BroadcastAction.ACTION_NOTIFY_SOFTWARE);
         filter.addAction(BroadcastAction.ACTION_PHONE_HANGUP);
         filter.addAction(BroadcastAction.ACTION_OPEN_FACE_DISTINGUISH);
+        filter.addAction(BroadcastAction.ACTION_CONTROL_ROBOT_EMOTION);
 
         registerReceiver(receiver, filter);
 
@@ -121,6 +123,13 @@ public class MsgReceiverService extends Service {
             } else if (intent.getAction().equals(BroadcastAction.ACTION_PHONE_HANGUP)) {//查看时电话挂断
                 Log.i("accept", "MsgReceiverService  查看时电话挂断");
                 // do nothing
+            } else if (intent.getAction().equals(BroadcastAction.ACTION_CONTROL_ROBOT_EMOTION)) {//机器人表情
+                Log.i("accept", "MsgReceiverService  机器人表情");
+                int emotionKey = intent.getIntExtra("emotion" , 0);
+                if (emotionKey != 0) {
+                    ViewCommon.initView();
+                    EmotionManager.showEmotionAnim(emotionKey);
+                }
             }
         }
     };

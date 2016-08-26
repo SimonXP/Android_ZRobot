@@ -19,7 +19,7 @@ import com.robot.et.core.software.common.push.netty.NettyClientHandler;
 import com.robot.et.core.software.common.script.ScriptHandler;
 import com.robot.et.core.software.common.view.EmotionManager;
 import com.robot.et.core.software.common.view.OneImgManager;
-import com.robot.et.core.software.common.view.TextManager;
+import com.robot.et.core.software.common.view.ViewCommon;
 import com.robot.et.core.software.system.media.MediaManager;
 import com.robot.et.db.RobotDB;
 import com.robot.et.entity.LearnAnswerInfo;
@@ -204,7 +204,7 @@ public class CommandHandler {
                     if (!TextUtils.isEmpty(faceName)) {
                         flag = true;
                         FaceManager.addFaceInfo(faceName);
-                        TextManager.showTextLinearLayout(false);
+                        ViewCommon.initView();
                         OneImgManager.showImg(R.mipmap.robot_qr_code);
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_SHOW_QRCODE, "我记住了，您可以扫描我的二维码和我聊天哦");
                     }
@@ -301,6 +301,7 @@ public class CommandHandler {
                 if (DataConfig.isStartRoam) {
                     DataConfig.isStartRoam = false;
                     flag = true;
+                    ViewCommon.initView();
                     EmotionManager.showEmotion(R.mipmap.emotion_normal);
                     SpeechImpl.getInstance().startListen();
                     Log.i("ifly", "通知本体开始漫游并识别物体");
@@ -338,6 +339,7 @@ public class CommandHandler {
                 if (DataConfig.isControlToyCar) {//控制小车
                     DataConfig.controlNum = 0;
                     BroadcastEnclosure.controlToyCarMove(context, moveKey, getToyCarNum());
+                    ViewCommon.initView();
                     EmotionManager.showEmotion(R.mipmap.emotion_normal);
                     SpeechImpl.getInstance().startListen();
                 } else {//控制机器人
@@ -396,7 +398,7 @@ public class CommandHandler {
     public boolean isMatchEmotion(String result) {
         EmotionEnum emotionEnum = EnumManager.getEmotionEnum(result);
         if (emotionEnum != null) {
-            TextManager.showTextLinearLayout(false);
+            ViewCommon.initView();
             EmotionManager.showEmotionAnim(emotionEnum.getEmotionKey());
             String answer = emotionEnum.getRequireAnswer();
             if (!TextUtils.isEmpty(answer)) {
@@ -447,7 +449,7 @@ public class CommandHandler {
         intent.setAction(BroadcastAction.ACTION_WAKE_UP_RESET);
         context.sendBroadcast(intent);
 
-        TextManager.showTextLinearLayout(false);
+        ViewCommon.initView();
         EmotionManager.showEmotion(R.mipmap.emotion_blink);
     }
 
@@ -471,6 +473,7 @@ public class CommandHandler {
                 BroadcastEnclosure.controlWaving(context, ScriptConfig.HAND_DOWN, handCategory, "0");
             }
         }, 1500);
+        ViewCommon.initView();
         EmotionManager.showEmotion(R.mipmap.emotion_normal);
         SpeechImpl.getInstance().startListen();
     }
@@ -519,6 +522,7 @@ public class CommandHandler {
             DataConfig.isPlayScript = false;
             ScriptHandler.doScriptAction(context, infos);
         } else {
+            ViewCommon.initView();
             EmotionManager.showEmotion(R.mipmap.emotion_normal);
             SpeechImpl.getInstance().startListen();
         }

@@ -331,25 +331,16 @@ public class FaceDistinguishActivity extends Activity {
                                 //Y中心点
                                 float pointY = FaceUtil.getRectCenterY(face);
                                 Log.i("face", "pointY===" + pointY);
-                                Intent intent = new Intent();
-                                String directionValue;
                                 /* 横向转头：0-180  正中间 90，  向左转90-0   向右 90-180
                                    越靠近90度的，距离正中间的位置越近
                                    上下抬头：0-60
                                    上下以垂直方向为0度，向前10度即-10，向后10度即+10。
                                    左右横向运动以正中为0度，向右10度即-10，向左10度即+10。
                                  */
-                                if (pointY < screenCenterX) {//向左转
-                                    Log.i("face", "向左转");
-                                    directionValue = "10";
-                                } else {//向右转
-                                    Log.i("face", "向右转");
-                                    directionValue = "-10";
-                                }
-                                intent.putExtra("direction", DataConfig.TURN_HEAD_ABOUT);
-                                intent.putExtra("angle", directionValue);
-                                intent.setAction(BroadcastAction.ACTION_ROBOT_TURN_HEAD);
-                                sendBroadcast(intent);
+                                String directionValue = getTurnDigit(pointY);
+                                Log.i("face", "directionValue===" + directionValue);
+
+                                BroadcastEnclosure.controlHead(FaceDistinguishActivity.this, DataConfig.TURN_HEAD_ABOUT, directionValue);
                             }
 
                             //识别
@@ -369,6 +360,29 @@ public class FaceDistinguishActivity extends Activity {
                 }
             }
         }).start();
+    }
+
+    //获取头部旋转角度
+    private String getTurnDigit(float pointY) {
+        String directionValue = "";
+        float tempValue;
+        String sign = "";
+        if (pointY < screenCenterY) {//向左转
+            Log.i("face", "向左转");
+            tempValue = screenCenterY - pointY;
+        } else {//向右转
+            Log.i("face", "向右转");
+            sign = "-";
+            tempValue = pointY - screenCenterY;
+        }
+        if (tempValue <= 20) {
+            directionValue = sign + 5;
+        } else if (20 < tempValue && tempValue <= 50) {
+            directionValue = sign + 10;
+        } else {
+            directionValue = sign + 15;
+        }
+        return directionValue;
     }
 
     @Override
