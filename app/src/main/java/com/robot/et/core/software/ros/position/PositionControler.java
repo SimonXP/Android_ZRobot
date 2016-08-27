@@ -22,7 +22,10 @@ public class PositionControler extends AbstractNodeMain implements MessageListen
 
     private Subscriber<geometry_msgs.PoseWithCovarianceStamped> subscriber;
     private boolean isReady = false;
-    private double[] pointXY =new double[2];
+
+    private double x;
+    private double y;
+    private double z;
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -40,20 +43,33 @@ public class PositionControler extends AbstractNodeMain implements MessageListen
     public void onNewMessage(geometry_msgs.PoseWithCovarianceStamped message) {
         isReady=true;
 //        message.getHeader();
-        double x = message.getPose().getPose().getPosition().getX();
-        double y = message.getPose().getPose().getPosition().getY();
-        double z = message.getPose().getPose().getPosition().getZ();
-        pointXY [0] = x;
-        pointXY [1] = y;
+        x = message.getPose().getPose().getPosition().getX();
+        y = message.getPose().getPose().getPosition().getY();
+        z = message.getPose().getPose().getPosition().getZ();
         Log.e("ROS_Client","获取到坐标X"+x+"坐标Y"+y);
 //        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "获取到坐标X"+x+"坐标Y"+y);
     }
 
-    public double[] getPointXY(){
+    public double getX(){
         if (isReady){
-            return pointXY;
-        }else {
-            return pointXY;
+            return x;
         }
+        return 0;
     }
+
+    public double getY(){
+        if (isReady){
+            return y;
+        }
+        return 0;
+    }
+
+    public double getZ(){
+        if (isReady){
+            return z;
+        }
+        return 0;
+    }
+
+
 }

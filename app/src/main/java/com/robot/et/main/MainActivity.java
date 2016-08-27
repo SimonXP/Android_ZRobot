@@ -462,13 +462,14 @@ public class MainActivity extends RosActivity {
                         SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "世界地图导航未开启，不能获取坐标");
                     }else {
                         nodeMainExecutorService.execute(positionControler, nodeConfiguration.setNodeName("positionControler"));
-                        double[] point = positionControler.getPointXY();
+                        double x =positionControler.getX();
+                        double y =positionControler.getY();
                         SpeechImpl.getInstance().cancelSpeak();
-                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "获取到"+name+"的当前X坐标为："+point[0]+",Y坐标："+point[1]);
+                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "获取到"+name+"的当前X坐标为："+x+",Y坐标："+y);
                         VisionRecogniseEnvironmentInfo info =new VisionRecogniseEnvironmentInfo();
                         info.setPositionName(name);
-                        info.setPositionX(String.valueOf(point[0]));
-                        info.setPositionY(String.valueOf(point[1]));
+                        info.setPositionX(String.valueOf(x));
+                        info.setPositionY(String.valueOf(y));
                         RobotDB.getInstance().addVisionRecogniseEnvironment(info);
                         Log.e("ROS_Client","记录位置信息成功");
                     }

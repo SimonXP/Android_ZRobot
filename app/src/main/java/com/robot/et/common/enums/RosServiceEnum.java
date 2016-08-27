@@ -20,7 +20,7 @@ public enum RosServiceEnum {
 	* @description Load A Map + Save A Map +Control Move
 	* Created by Tony
 	*/
-	WORLDNAVIGATION("World Navigation","世界地图导航"),//匹配Rapp中的World Navigation
+	WORLDNAVIGATION("World Navigation","地图导航"),//匹配Rapp中的World Navigation
 
 	SAVEAMAP("SaveAMap","保存地图"),
 	SAVEAMAP2("SaveAMap","地图保存"),
