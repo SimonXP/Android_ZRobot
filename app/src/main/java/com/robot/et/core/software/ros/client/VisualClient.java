@@ -103,15 +103,16 @@ public class VisualClient extends AbstractNodeMain {
                             SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "我不认识这个东西，让我学习一下吧！");
                         }else if (response.getResult2()== 1){
                             //可能（40%以上）
-                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这可能是："+response.getName());
+                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这好像是："+response.getName());
                         }else if (response.getResult2()== 2){
                             //是（80%以上）
                             SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这是："+response.getName());
                         }else if (response.getResult2()== 3){
                             //一定（95%以上）
-                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这一定是："+response.getName());
+                            SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这是："+response.getName());
                         }else if (response.getResult2()== 10){
-                            String[] temp=response.getName().split("|");
+                            String[] temp=response.getName().split("\\|");
+                            Log.e("ROS_Client","content:"+temp[0]+",=="+temp[1]);
                             if (temp.length==2){
                                 SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "这个不是："+temp[0]+"就是："+temp[1]);
                             }else {
@@ -138,9 +139,9 @@ public class VisualClient extends AbstractNodeMain {
                 }else if (flag == 4){
                     //视觉识别
                     if (response.getResult1()==0){
-                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉识别模块");
+                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉学习模块");
                     }else {
-                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉识别模块失败");
+                        SpeechImpl.getInstance().startSpeak(DataConfig.SPEAK_TYPE_CHAT, "关闭视觉学习模块失败");
                     }
                 }else if (flag == 5){
                     //删除所有视觉学习内容
