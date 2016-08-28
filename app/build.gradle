@@ -10,6 +10,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -30,6 +31,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.0.0'
 
+    compile 'com.android.support:multidex:1.0.0'
+
     compile 'com.github.rosjava.android_remocons:common_tools:[0.2,0.3)'
     compile 'org.ros.android_core:android_15:[0.2,0.3)'
+
+    compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.5.0'
+    compile group: 'com.squareup.okio', name: 'okio', version: '1.6.0'
+    compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.7'
+
 }

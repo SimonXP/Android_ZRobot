@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 唤醒后说的话 -->
+    <string-array name="wake_up_speak_content">
+        <item>小的在!</item>
+        <item>本宝宝在!</item>
+        <item>叫人家干嘛?</item>
+        <item>干嘛呀!</item>
+        <item>这呢?</item>
+        <item>我在这呢</item>
+        <item>有何吩咐</item>
+        <item>听候差遣</item>
+    </string-array>
+
+    <!-- 自定义问题 -->
+    <string-array name="custom_question">
+        <item>你知道你在哪里吗</item>
+        <item>你是谁</item>
+        <item>你叫什么名字</item>
+        <item>介绍一下你自己</item>
+        <item>你是怎么学习的</item>
+        <item>台州有什么好玩的</item>
+        <item>台州有什么好吃的</item>
+    </string-array>
+
+    <!-- 自定义答案 -->
+    <string-array name="custom_answer">
+        <item>我在台州市椒江区</item>
+        <item>我是小黄人</item>
+        <item>我是小黄人</item>
+        <item>我是小黄人机器人，是儿童的好伙伴，我会主动和小主人学习、娱乐，我还拥有分布式智能大脑，和其它机器人互动，控制周围的玩具。我还有视觉深度学习系统，在和小主人相处的时候，我也在一天一天变得更聪明，并且认识家里的物品，还有家里的所有人，希望我能成为您家庭的一员，希望大家能喜欢我~</item>
+        <item>你可以教我，比如：如果我说苹果是什么，你就说苹果是水果，然后我就会记住</item>
+        <item>好玩的地方有很多哦，例如：三门湾蛇蟠岛景区，天台山龙穿峡景区，桃渚古城，吴子熊玻璃艺术馆，台州海洋世界，解放一江山岛纪念馆，江南长城，仙居，括苍山，滨江世纪公园，大陈岛景区，黄岩九峰人民公园，白云飞瀑等等，请问你想去哪里玩呢？</item>
+        <item>好吃的可多了呢，例如：临海麦虾，天台饺饼筒，三合小油泡，椒江手打面，三门海鲜，大排面，面脑面，三鲜面，砂锅等等，要不要我带你去吃呀，嘿嘿。</item>
+    </string-array>
+
+</resources>
