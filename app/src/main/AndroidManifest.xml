@@ -14,8 +14,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <!-- 屏幕一直亮着的权限 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- 开机自启动服务的权限 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
         android:name=".app.CustomApplication"
@@ -35,11 +41,27 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.software.iflytek.IflySpeakService" />
-        <service android:name=".service.software.iflytek.IflyTextUnderstanderService" />
-        <service android:name=".service.software.iflytek.IflyVoiceToTextService" />
-        <service android:name=".service.software.turing.TuRingService" />
-        <service android:name=".service.software.system.music.MusicPlayerService" />
+        <activity android:name=".core.software.face.detector.FaceDetectorActivity"
+            android:screenOrientation="portrait"
+            ></activity>
+
+        <service android:name=".core.software.iflytek.IflySpeakService" />
+        <service android:name=".core.software.iflytek.IflyTextUnderstanderService" />
+        <service android:name=".core.software.iflytek.IflyVoiceToTextService" />
+        <service android:name=".core.software.turing.TuRingService" />
+        <service android:name=".core.software.system.music.MusicPlayerService" />
+        <service android:name=".core.hardware.wakeup.WakeUpServices"/>
+        <service android:name=".core.software.window.MsgReceiverService"/>
+        <service android:name=".core.software.netty.NettyService"/>
+        <service android:name=".core.hardware.move.ControlMoveService"/>
+
+        <receiver android:name=".receiver.AlarmRemindReceiver" />
+
+        <receiver android:name=".receiver.SystemReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
